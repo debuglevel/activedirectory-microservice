@@ -1,10 +1,8 @@
 package de.debuglevel.activedirectory.rest
 
+import com.natpryce.konfig.*
 import com.natpryce.konfig.Configuration
-import com.natpryce.konfig.ConfigurationProperties
 import com.natpryce.konfig.ConfigurationProperties.Companion.systemProperties
-import com.natpryce.konfig.EnvironmentVariables
-import com.natpryce.konfig.overriding
 import java.io.File
 
 object Configuration {
@@ -28,5 +26,7 @@ object Configuration {
         configuration = config
     }
 
-    //val mongodbUrl = configuration.getOrNull(Key("mongodb.url", stringType)) ?: "localhost:27017"
+    val username = configuration[Key("username", stringType)]
+    val password = configuration[Key("password", stringType)]
+    val server = configuration[Key("server", stringType)]
 }
