@@ -48,7 +48,7 @@ class RestEndpointTests {
         }
 
         @ParameterizedTest
-        @MethodSource("validNameProvider")
+        @MethodSource("validDomainProvider")
         fun `server sends greeting in body`(testData: NameTestData) {
             // Arrange
 
@@ -60,7 +60,7 @@ class RestEndpointTests {
         }
 
         @ParameterizedTest
-        @MethodSource("validNameProvider")
+        @MethodSource("validDomainProvider")
         fun `server sends correct greeting on api version 2 and default`(testData: NameTestData) {
             // Arrange
 
@@ -86,7 +86,7 @@ class RestEndpointTests {
         }
 
         @ParameterizedTest
-        @MethodSource("validNameProvider")
+        @MethodSource("validDomainProvider")
         fun `server sends status code 200`(testData: NameTestData) {
             // Arrange
 
@@ -98,7 +98,7 @@ class RestEndpointTests {
         }
 
         @ParameterizedTest
-        @MethodSource("validNameProvider")
+        @MethodSource("validDomainProvider")
         fun `server sends json content type`(testData: NameTestData) {
             // Arrange
 
@@ -110,7 +110,7 @@ class RestEndpointTests {
         }
 
         @ParameterizedTest
-        @MethodSource("validNameProvider")
+        @MethodSource("validDomainProvider")
         fun `server sends json content`(testData: NameTestData) {
             // Arrange
 
@@ -126,7 +126,7 @@ class RestEndpointTests {
                 NameTestData(value = "Mozart", expected = "Hello, Mozart!"),
                 NameTestData(value = "Amadeus", expected = "Hello, Amadeus!"),
                 // TODO: Umlauts do not work when executed as gradle task in Windows
-//                NameTestData(value = "H%C3%A4nschen", expected = "Hello, Hänschen!"),
+//                DnTestData(value = "H%C3%A4nschen", expectedFilter = "Hello, Hänschen!"),
                 NameTestData(value = "Max%20Mustermann", expected = "Hello, Max Mustermann!")
         )
 
@@ -134,7 +134,7 @@ class RestEndpointTests {
                 NameTestData(value = "Mozart", expected = "Hello from API v1, Mozart!"),
                 NameTestData(value = "Amadeus", expected = "Hello from API v1, Amadeus!"),
                 // TODO: Umlauts do not work when executed as gradle task in Windows
-//                NameTestData(value = "H%C3%A4nschen", expected = "Hello, Hänschen!"),
+//                DnTestData(value = "H%C3%A4nschen", expectedFilter = "Hello, Hänschen!"),
                 NameTestData(value = "Max%20Mustermann", expected = "Hello from API v1, Max Mustermann!")
         )
     }
@@ -204,7 +204,7 @@ class RestEndpointTests {
         }
 
         fun invalidNameProvider() = Stream.of(
-                //NameTestData(value = ""),
+                //DnTestData(value = ""),
                 NameTestData(value = "%20")
         )
     }
