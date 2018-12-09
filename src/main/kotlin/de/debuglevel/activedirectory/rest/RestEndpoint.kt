@@ -1,6 +1,6 @@
-package de.debuglevel.greeting.rest
+package de.debuglevel.activedirectory.rest
 
-import de.debuglevel.greeting.rest.greeting.GreetingController
+import de.debuglevel.activedirectory.rest.greeting.GreetingController
 import de.debuglevel.microservices.utils.apiversion.apiVersion
 import de.debuglevel.microservices.utils.logging.buildRequestLog
 import de.debuglevel.microservices.utils.logging.buildResponseLog
@@ -29,20 +29,7 @@ class RestEndpoint {
         configuredPort()
         status(this::class.java)
 
-        // publish following paths on e.g. /v1/greetings/
-        apiVersion("1")
-        {
-            path("/greetings") {
-                get("/:name") {
-                    val name = params(":name")
-                    logger.info("Got request to greeting '$name' on API v1")
-                    "Hello from API v1, $name!"
-                }
-            }
-        }
-
-        // publish following paths on e.g. /v2/greetings/ and /greetings/ (as "default" is true)
-        apiVersion("2", true)
+        apiVersion("1", true)
         {
             path("/greetings") {
                 //get("/", "text/html", GreetingController.getListHtml())

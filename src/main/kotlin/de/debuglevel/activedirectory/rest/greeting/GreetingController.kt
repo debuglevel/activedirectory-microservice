@@ -1,7 +1,7 @@
-package de.debuglevel.greeting.rest.greeting
+package de.debuglevel.activedirectory.rest.greeting
 
-import de.debuglevel.greeting.domain.greeting.Greeter
-import de.debuglevel.greeting.rest.responsetransformer.JsonTransformer
+import de.debuglevel.activedirectory.domain.greeting.Greeter
+import de.debuglevel.activedirectory.rest.responsetransformer.JsonTransformer
 import mu.KotlinLogging
 import spark.kotlin.RouteHandler
 
@@ -31,7 +31,7 @@ object GreetingController {
 //            val greetingId = request.params(":greetingId").toInt()
 //
 //            val model = HashMap<String, Any>()
-//            MustacheTemplateEngine().render(ModelAndView(model, "greeting/show.html.mustache"))
+//            MustacheTemplateEngine().render(ModelAndView(model, "activedirectory/show.html.mustache"))
 //        }
 //    }
 
@@ -51,14 +51,14 @@ object GreetingController {
 //    fun getListHtml(): RouteHandler.() -> String {
 //        return {
 //            val model = HashMap<String, Any>()
-//            MustacheTemplateEngine().render(ModelAndView(model, "greeting/list.html.mustache"))
+//            MustacheTemplateEngine().render(ModelAndView(model, "activedirectory/list.html.mustache"))
 //        }
 //    }
 
 //    fun getAddFormHtml(): RouteHandler.() -> String {
 //        return {
 //            val model = HashMap<String, Any>()
-//            MustacheTemplateEngine().render(ModelAndView(model, "greeting/add.html.mustache"))
+//            MustacheTemplateEngine().render(ModelAndView(model, "activedirectory/add.html.mustache"))
 //        }
 //    }
 }

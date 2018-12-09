@@ -1,4 +1,4 @@
-package de.debuglevel.greeting.rest
+package de.debuglevel.activedirectory.rest
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested

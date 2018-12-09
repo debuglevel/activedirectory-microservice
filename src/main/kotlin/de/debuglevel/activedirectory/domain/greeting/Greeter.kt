@@ -1,6 +1,6 @@
-package de.debuglevel.greeting.domain.greeting
+package de.debuglevel.activedirectory.domain.greeting
 
-import de.debuglevel.greeting.rest.greeting.GreetingDTO
+import de.debuglevel.activedirectory.rest.greeting.GreetingDTO
 import mu.KotlinLogging
 
 /**
@@ -16,14 +16,14 @@ object Greeter {
      *
      * @param name a (valid) name which should be greeted
      * @throws GreetingException thrown if the given name is invalid (i.e. blank)
-     * @return a greeting
+     * @return a activedirectory
      */
     @Throws(GreetingException::class)
     fun greet(name: String): GreetingDTO {
         logger.debug { "Greeting '$name'..." }
 
         if (name.isBlank()) {
-            throw GreetingException("Cannot greeting a blank name.")
+            throw GreetingException("Cannot activedirectory a blank name.")
         }
 
         val greeting = GreetingDTO(name)

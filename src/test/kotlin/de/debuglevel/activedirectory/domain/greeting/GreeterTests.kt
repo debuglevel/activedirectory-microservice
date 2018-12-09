@@ -1,4 +1,4 @@
-package de.debuglevel.greeting.domain.greeting
+package de.debuglevel.activedirectory.domain.greeting
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType

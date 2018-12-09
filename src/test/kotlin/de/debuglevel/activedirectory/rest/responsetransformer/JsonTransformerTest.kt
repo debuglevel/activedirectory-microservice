@@ -1,4 +1,4 @@
-package de.debuglevel.greeting.rest.responsetransformer
+package de.debuglevel.activedirectory.rest.responsetransformer
 
 import com.google.gson.Gson
 import org.assertj.core.api.Assertions

@@ -1,4 +1,4 @@
-package de.debuglevel.greeting.rest
+package de.debuglevel.activedirectory.rest
 
 import com.natpryce.konfig.Key
 import com.natpryce.konfig.intType
