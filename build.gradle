@@ -34,7 +34,7 @@ version '0.0.1-SNAPSHOT'
 
 // application plugin configuration
 applicationName = "Active Directory Microservice"
-mainClassName = "de.debuglevel.activedurectory.rest.MainKt"
+mainClassName = "de.debuglevel.activedirectory.rest.MainKt"
 
 sourceCompatibility = 1.8
 
