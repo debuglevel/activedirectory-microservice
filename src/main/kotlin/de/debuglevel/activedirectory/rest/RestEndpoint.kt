@@ -1,5 +1,6 @@
 package de.debuglevel.activedirectory.rest
 
+import de.debuglevel.activedirectory.rest.user.UserController
 import de.debuglevel.microservices.utils.apiversion.apiVersion
 import de.debuglevel.microservices.utils.logging.buildRequestLog
 import de.debuglevel.microservices.utils.logging.buildResponseLog
@@ -9,6 +10,7 @@ import mu.KotlinLogging
 import spark.Spark.path
 import spark.kotlin.after
 import spark.kotlin.before
+import spark.kotlin.get
 
 
 /**
@@ -29,15 +31,15 @@ class RestEndpoint {
 
         apiVersion("1", true)
         {
-            path("/greetings") {
-                //get("/", "text/html", GreetingController.getListHtml())
-                //get("/", "application/json", GreetingController.getList())
-                //post("/", function = GreetingController.postOne())
+            path("/users") {
+                //get("/", "text/html", UserController.getListHtml())
+                //get("/", "application/json", UserController.getList())
+                //post("/", function = UserController.postOne())
 
-                path("/:name") {
-                    //get("", "application/json", GreetingController.getOne())
-                    //get("/", "application/json", GreetingController.getOne())
-                    //get("/", "text/html", GreetingController.getOneHtml())
+                path("/:username") {
+                    get("", "application/json", UserController.getOne())
+                    get("/", "application/json", UserController.getOne())
+                    //get("/", "text/html", UserController.getOneHtml())
                 }
             }
         }
