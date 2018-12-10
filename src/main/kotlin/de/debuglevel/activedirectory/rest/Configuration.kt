@@ -26,7 +26,7 @@ object Configuration {
         configuration = config
     }
 
-    val username = configuration[Key("username", stringType)]
-    val password = configuration[Key("password", stringType)]
-    val server = configuration[Key("server", stringType)]
+    val username = configuration[Key("activedirectory.username", stringType)]
+    val password = configuration[Key("activedirectory.password", stringType)]
+    val server = configuration[Key("activedirectory.server", stringType)]
 }
