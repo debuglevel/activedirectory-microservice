@@ -15,7 +15,7 @@ object UserController {
             val username = params(":username")
 
             try {
-                val users = ActiveDirectory(Configuration.username, Configuration.password, Configuration.server)
+                val users = ActiveDirectory(Configuration.username, Configuration.password, Configuration.server, Configuration.searchBase)
                         .getUsers(username, SearchScope.Username)
 
                 val user = users.first()

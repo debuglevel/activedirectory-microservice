@@ -29,4 +29,5 @@ object Configuration {
     val username = configuration[Key("activedirectory.username", stringType)]
     val password = configuration[Key("activedirectory.password", stringType)]
     val server = configuration[Key("activedirectory.server", stringType)]
+    val searchBase = configuration[Key("activedirectory.searchbase", stringType)]
 }

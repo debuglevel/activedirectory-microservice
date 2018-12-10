@@ -12,7 +12,10 @@ import javax.naming.directory.SearchControls
 import javax.naming.directory.SearchResult
 
 // see original at https://myjeeva.com/querying-active-directory-using-java.html
-class ActiveDirectory(username: String, password: String, private val domainController: String) : Closeable {
+class ActiveDirectory(username: String,
+                      password: String,
+                      private val domainController: String,
+                      private val searchBase: String) : Closeable {
     private val logger = KotlinLogging.logger {}
 
     private var dirContext: DirContext
@@ -23,7 +26,7 @@ class ActiveDirectory(username: String, password: String, private val domainCont
         val properties: Properties = Properties()
         properties[Context.INITIAL_CONTEXT_FACTORY] = "com.sun.jndi.ldap.LdapCtxFactory"
         properties[Context.PROVIDER_URL] = "LDAP://$domainController"
-        properties[Context.SECURITY_PRINCIPAL] = "$username@$domainController"
+        properties[Context.SECURITY_PRINCIPAL] = username
         properties[Context.SECURITY_CREDENTIALS] = password
 
         // initializing Active Directory LDAP connection
@@ -46,18 +49,16 @@ class ActiveDirectory(username: String, password: String, private val domainCont
      *
      * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email
      * @param searchBy a [java.lang.String] object - scope of search by username or by email id
-     * @param searchBase a [java.lang.String] object - search base value for scope tree for eg. DC=debuglevel,DC=de
      * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
      * @throws NamingException
      */
-    private fun searchUser(searchValue: String, searchBy: SearchScope, searchBase: String? = null): NamingEnumeration<SearchResult> {
+    private fun searchUser(searchValue: String, searchBy: SearchScope): NamingEnumeration<SearchResult> {
         logger.debug { "Searching for user '$searchValue' by $searchBy..." }
 
         val filter = getFilter(searchValue, searchBy)
-        val base = getBaseDN(searchBase ?: this.domainController)
 
         return try {
-            this.dirContext.search(base, filter, this.searchControls)
+            this.dirContext.search(this.searchBase, filter, this.searchControls)
         } catch (e: NamingException) {
             logger.error(e) { "Failed searching for user." }
             throw e
@@ -69,14 +70,13 @@ class ActiveDirectory(username: String, password: String, private val domainCont
      *
      * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email
      * @param searchBy a [java.lang.String] object - scope of search by username or by email id
-     * @param searchBase a [java.lang.String] object - search base value for scope tree for eg. DC=debuglevel,DC=de
      * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
      * @throws NamingException
      */
-    fun getUsers(searchValue: String, searchBy: SearchScope, searchBase: String? = null): List<User> {
+    fun getUsers(searchValue: String, searchBy: SearchScope): List<User> {
         logger.debug { "Getting user '$searchValue' by $searchBy..." }
 
-        val results = searchUser(searchValue, searchBy, searchBase)
+        val results = searchUser(searchValue, searchBy)
         val users = buildUsers(results)
 
         logger.debug { "Got ${users.count()} users for '$searchValue' by $searchBy..." }
