@@ -30,9 +30,9 @@ class ActiveDirectory(username: String, password: String, private val domainCont
         try {
             logger.debug { "Initialize LDAP connection..." }
             dirContext = InitialDirContext(properties)
-        } catch (e: NamingException) {
+        } catch (e: Exception) {
             logger.error(e) { "Failed initializing LDAP connection." }
-            throw e
+            throw ConnectionException(e)
         }
 
         // initializing search controls
@@ -157,3 +157,5 @@ class ActiveDirectory(username: String, password: String, private val domainCont
         }
     }
 }
+
+class ConnectionException(e: Exception) : Exception("Could not connect to LDAP server", e)

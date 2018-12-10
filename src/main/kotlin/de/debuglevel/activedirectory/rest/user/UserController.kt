@@ -1,6 +1,7 @@
 package de.debuglevel.activedirectory.rest.user
 
 import de.debuglevel.activedirectory.domain.activedirectory.ActiveDirectory
+import de.debuglevel.activedirectory.domain.activedirectory.ConnectionException
 import de.debuglevel.activedirectory.domain.activedirectory.SearchScope
 import de.debuglevel.activedirectory.rest.Configuration
 import de.debuglevel.activedirectory.rest.responsetransformer.JsonTransformer
@@ -32,6 +33,11 @@ object UserController {
                 response.type("application/json")
                 response.status(404)
                 "{\"message\":\"username '$username' does not exist\"}"
+            } catch (e: ConnectionException) {
+                logger.info("Could not connect to Active Directory.")
+                response.type("application/json")
+                response.status(404)
+                "{\"message\":\"could not connect to Active Directory\"}"
             }
         }
     }
