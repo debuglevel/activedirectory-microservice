@@ -24,7 +24,7 @@ class RestEndpointTests {
         // Arrange
 
         // Act
-        val response = ApiTestUtils.request("GET", "/greetings/test", null)
+        val response = ApiTestUtils.request("GET", "/users/", null)
 
         // Assert
         // HTTP Codes begin from "100". So something from 100 and above was probably a response to a HTTP request
@@ -33,89 +33,89 @@ class RestEndpointTests {
 
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    inner class `valid requests on greet` {
-        @Test
-        fun `server lists greetings`() {
-            // Arrange
+    inner class `valid requests on users` {
+//        @Test
+//        fun `server lists users`() {
+//            // Arrange
+//
+//            // Act
+//            val response = ApiTestUtils.request("GET", "/users/", null)
+//
+//            // Assert
+//            assertThat(response?.body).contains("Mozart")
+//            assertThat(response?.body).contains("Beethoven")
+//            assertThat(response?.body).contains("Haydn")
+//        }
 
-            // Act
-            val response = ApiTestUtils.request("GET", "/greetings/", null)
+//        @ParameterizedTest
+//        @MethodSource("validDomainProvider")
+//        fun `server sends user in body`(testData: NameTestData) {
+//            // Arrange
+//
+//            // Act
+//            val response = ApiTestUtils.request("GET", "/users/${testData.value}", null)
+//
+//            // Assert
+//            assertThat(response?.body).contains(testData.expected)
+//        }
 
-            // Assert
-            assertThat(response?.body).contains("Mozart")
-            assertThat(response?.body).contains("Beethoven")
-            assertThat(response?.body).contains("Haydn")
-        }
+//        @ParameterizedTest
+//        @MethodSource("validDomainProvider")
+//        fun `server sends correct user on api version 2 and default`(testData: NameTestData) {
+//            // Arrange
+//
+//            // Act
+//            val responseApiDefault = ApiTestUtils.request("GET", "/users/${testData.value}", null)
+//            val responseApiV2 = ApiTestUtils.request("GET", "/v2/users/${testData.value}", null)
+//
+//            // Assert
+//            assertThat(responseApiDefault?.body).contains(testData.expected)
+//            assertThat(responseApiV2?.body).contains(testData.expected)
+//        }
+
+//        @ParameterizedTest
+//        @MethodSource("validNameProviderApiV1")
+//        fun `server sends correct user on api version 1`(testData: NameTestData) {
+//            // Arrange
+//
+//            // Act
+//            val responseApiV1 = ApiTestUtils.request("GET", "/v1/users/${testData.value}", null)
+//
+//            // Assert
+//            assertThat(responseApiV1?.body).contains(testData.expected)
+//        }
+
+//        @ParameterizedTest
+//        @MethodSource("validDomainProvider")
+//        fun `server sends status code 200`(testData: NameTestData) {
+//            // Arrange
+//
+//            // Act
+//            val response = ApiTestUtils.request("GET", "/users/${testData.value}", null)
+//
+//            // Assert
+//            assertThat(response?.status).isEqualTo(200)
+//        }
 
         @ParameterizedTest
-        @MethodSource("validDomainProvider")
-        fun `server sends greeting in body`(testData: NameTestData) {
-            // Arrange
-
-            // Act
-            val response = ApiTestUtils.request("GET", "/greetings/${testData.value}", null)
-
-            // Assert
-            assertThat(response?.body).contains(testData.expected)
-        }
-
-        @ParameterizedTest
-        @MethodSource("validDomainProvider")
-        fun `server sends correct greeting on api version 2 and default`(testData: NameTestData) {
-            // Arrange
-
-            // Act
-            val responseApiDefault = ApiTestUtils.request("GET", "/greetings/${testData.value}", null)
-            val responseApiV2 = ApiTestUtils.request("GET", "/v2/greetings/${testData.value}", null)
-
-            // Assert
-            assertThat(responseApiDefault?.body).contains(testData.expected)
-            assertThat(responseApiV2?.body).contains(testData.expected)
-        }
-
-        @ParameterizedTest
-        @MethodSource("validNameProviderApiV1")
-        fun `server sends correct greeting on api version 1`(testData: NameTestData) {
-            // Arrange
-
-            // Act
-            val responseApiV1 = ApiTestUtils.request("GET", "/v1/greetings/${testData.value}", null)
-
-            // Assert
-            assertThat(responseApiV1?.body).contains(testData.expected)
-        }
-
-        @ParameterizedTest
-        @MethodSource("validDomainProvider")
-        fun `server sends status code 200`(testData: NameTestData) {
-            // Arrange
-
-            // Act
-            val response = ApiTestUtils.request("GET", "/greetings/${testData.value}", null)
-
-            // Assert
-            assertThat(response?.status).isEqualTo(200)
-        }
-
-        @ParameterizedTest
-        @MethodSource("validDomainProvider")
+        @MethodSource("validNameProvider")
         fun `server sends json content type`(testData: NameTestData) {
             // Arrange
 
             // Act
-            val response = ApiTestUtils.request("GET", "/greetings/${testData.value}", null)
+            val response = ApiTestUtils.request("GET", "/users/${testData.value}", null)
 
             // Assert
             assertThat(response?.contentType).isEqualTo("application/json")
         }
 
         @ParameterizedTest
-        @MethodSource("validDomainProvider")
+        @MethodSource("validNameProvider")
         fun `server sends json content`(testData: NameTestData) {
             // Arrange
 
             // Act
-            val response = ApiTestUtils.request("GET", "/greetings/${testData.value}", null)
+            val response = ApiTestUtils.request("GET", "/users/${testData.value}", null)
 
             // Assert
             val validJson = JsonUtils.isJSONValid(response?.body)
@@ -142,41 +142,41 @@ class RestEndpointTests {
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class `invalid requests on greet` {
-        @ParameterizedTest
-        @MethodSource("invalidNameProvider")
-        fun `server does not send greeting in body`(testData: NameTestData) {
-            // Arrange
+//        @ParameterizedTest
+//        @MethodSource("invalidNameProvider")
+//        fun `server does not send user in body`(testData: NameTestData) {
+//            // Arrange
+//
+//            // Act
+//            val response = ApiTestUtils.request("GET", "/users/${testData.value}", null)
+//
+//            // Assert
+//            assertThat(response?.body).doesNotContain("Hello, ${testData.value}!")
+//        }
 
-            // Act
-            val response = ApiTestUtils.request("GET", "/greetings/${testData.value}", null)
+//        @ParameterizedTest
+//        @MethodSource("invalidNameProvider")
+//        fun `server sends error message`(testData: NameTestData) {
+//            // Arrange
+//
+//            // Act
+//            val response = ApiTestUtils.request("GET", "/users/${testData.value}", null)
+//
+//            // Assert
+//            assertThat(response?.body).contains("message")
+//        }
 
-            // Assert
-            assertThat(response?.body).doesNotContain("Hello, ${testData.value}!")
-        }
-
-        @ParameterizedTest
-        @MethodSource("invalidNameProvider")
-        fun `server sends error message`(testData: NameTestData) {
-            // Arrange
-
-            // Act
-            val response = ApiTestUtils.request("GET", "/greetings/${testData.value}", null)
-
-            // Assert
-            assertThat(response?.body).contains("message")
-        }
-
-        @ParameterizedTest
-        @MethodSource("invalidNameProvider")
-        fun `server sends status code 400`(testData: NameTestData) {
-            // Arrange
-
-            // Act
-            val response = ApiTestUtils.request("GET", "/greetings/${testData.value}", null)
-
-            // Assert
-            assertThat(response?.status).isEqualTo(400)
-        }
+//        @ParameterizedTest
+//        @MethodSource("invalidNameProvider")
+//        fun `server sends status code 400`(testData: NameTestData) {
+//            // Arrange
+//
+//            // Act
+//            val response = ApiTestUtils.request("GET", "/users/${testData.value}", null)
+//
+//            // Assert
+//            assertThat(response?.status).isEqualTo(400)
+//        }
 
         @ParameterizedTest
         @MethodSource("invalidNameProvider")
@@ -184,7 +184,7 @@ class RestEndpointTests {
             // Arrange
 
             // Act
-            val response = ApiTestUtils.request("GET", "/greetings/${testData.value}", null)
+            val response = ApiTestUtils.request("GET", "/users/${testData.value}", null)
 
             // Assert
             assertThat(response?.contentType).isEqualTo("application/json")
@@ -196,7 +196,7 @@ class RestEndpointTests {
             // Arrange
 
             // Act
-            val response = ApiTestUtils.request("GET", "/greetings/${testData.value}", null)
+            val response = ApiTestUtils.request("GET", "/users/${testData.value}", null)
 
             // Assert
             val validJson = JsonUtils.isJSONValid(response?.body)
