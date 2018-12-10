@@ -89,9 +89,9 @@ class ActiveDirectory(username: String,
         val users = results.asSequence()
                 .map {
                     val samaaccountname = it.attributes.get("samaccountname").toString().substringAfter(": ")
-                    val givenname = it.attributes.get("givenname").toString().substringAfter(": ")
-                    val mail = it.attributes.get("mail").toString().substringAfter(": ")
-                    val cn = it.attributes.get("cn").toString().substringAfter(": ")
+                    val givenname = it.attributes.get("givenname")?.toString()?.substringAfter(": ")
+                    val mail = it.attributes.get("mail")?.toString()?.substringAfter(": ")
+                    val cn = it.attributes.get("cn")?.toString()?.substringAfter(": ")
 
                     User(
                             samaaccountname,
