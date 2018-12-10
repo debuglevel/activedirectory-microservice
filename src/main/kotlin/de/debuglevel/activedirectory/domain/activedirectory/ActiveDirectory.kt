@@ -86,19 +86,25 @@ class ActiveDirectory(username: String,
     private fun buildUsers(results: NamingEnumeration<SearchResult>): List<User> {
         logger.debug { "Building users from search results..." }
 
-        return results.asSequence()
+        val users = results.asSequence()
                 .map {
-                    val samaaccountname = it.attributes.get("samaccountname").toString().substringAfter(':')
-                    val givenname = it.attributes.get("givenname").toString().substringAfter(':')
-                    val mail = it.attributes.get("mail").toString().substringAfter(':')
-                    val cn = it.attributes.get("cn").toString().substringAfter(':')
+                    val samaaccountname = it.attributes.get("samaccountname").toString().substringAfter(": ")
+                    val givenname = it.attributes.get("givenname").toString().substringAfter(": ")
+                    val mail = it.attributes.get("mail").toString().substringAfter(": ")
+                    val cn = it.attributes.get("cn").toString().substringAfter(": ")
 
                     User(
                             samaaccountname,
                             givenname,
                             mail,
                             cn)
-                }.toList()
+                }
+                .onEach { logger.debug { "Got user $it" } }
+                .toList()
+
+        logger.debug { "Built ${users.count()} users." }
+
+        return users
     }
 
     /**
