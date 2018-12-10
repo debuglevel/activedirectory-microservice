@@ -5,3 +5,7 @@ services:
     image: activedirectory-microservice
     ports:
     - "80:80"
+    environment:
+    - USERNAME=bindingUsername
+    - PASSWORD=bindingPassword
+    - SERVER=domainController.com
