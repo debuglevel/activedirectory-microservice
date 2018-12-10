@@ -156,6 +156,6 @@ class ActiveDirectory(username: String, password: String, private val domainCont
             return dn
         }
     }
-}
 
-class ConnectionException(e: Exception) : Exception("Could not connect to LDAP server", e)
+    class ConnectionException(e: Exception) : Exception("Could not connect to LDAP server", e)
+}
