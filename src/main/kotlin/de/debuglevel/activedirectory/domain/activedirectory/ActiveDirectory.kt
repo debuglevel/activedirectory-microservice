@@ -50,7 +50,7 @@ class ActiveDirectory(username: String, password: String, private val domainCont
      * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
      * @throws NamingException
      */
-    fun searchUser(searchValue: String, searchBy: SearchScope, searchBase: String? = null): NamingEnumeration<SearchResult> {
+    private fun searchUser(searchValue: String, searchBy: SearchScope, searchBase: String? = null): NamingEnumeration<SearchResult> {
         logger.debug { "Searching for user '$searchValue' by $searchBy..." }
 
         val filter = getFilter(searchValue, searchBy)
@@ -62,6 +62,43 @@ class ActiveDirectory(username: String, password: String, private val domainCont
             logger.error(e) { "Failed searching for user." }
             throw e
         }
+    }
+
+    /**
+     * Gets an user from the Active Directory by username/email id for given search base
+     *
+     * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email
+     * @param searchBy a [java.lang.String] object - scope of search by username or by email id
+     * @param searchBase a [java.lang.String] object - search base value for scope tree for eg. DC=debuglevel,DC=de
+     * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
+     * @throws NamingException
+     */
+    fun getUsers(searchValue: String, searchBy: SearchScope, searchBase: String? = null): List<User> {
+        logger.debug { "Getting user '$searchValue' by $searchBy..." }
+
+        val results = searchUser(searchValue, searchBy, searchBase)
+        val users = buildUsers(results)
+
+        logger.debug { "Got ${users.count()} users for '$searchValue' by $searchBy..." }
+        return users
+    }
+
+    private fun buildUsers(results: NamingEnumeration<SearchResult>): List<User> {
+        logger.debug { "Building users from search results..." }
+
+        return results.asSequence()
+                .map {
+                    val samaaccountname = it.attributes.get("samaccountname").toString().substringAfter(':')
+                    val givenname = it.attributes.get("givenname").toString().substringAfter(':')
+                    val mail = it.attributes.get("mail").toString().substringAfter(':')
+                    val cn = it.attributes.get("cn").toString().substringAfter(':')
+
+                    User(
+                            samaaccountname,
+                            givenname,
+                            mail,
+                            cn)
+                }.toList()
     }
 
     /**
