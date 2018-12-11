@@ -35,7 +35,7 @@ object UserController {
             } catch (e: ActiveDirectory.ConnectionException) {
                 logger.info("Could not connect to Active Directory.")
                 response.type("application/json")
-                response.status(404)
+                response.status(502)
                 "{\"message\":\"could not connect to Active Directory\"}"
             }
         }

@@ -6,9 +6,7 @@ import com.github.trevershick.test.ldap.annotations.LdapConfiguration
 import com.github.trevershick.test.ldap.annotations.LdapEntry
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
@@ -46,6 +44,10 @@ class ActiveDirectoryTests {
     private val logger = KotlinLogging.logger {}
 
     private lateinit var ldapServer: LdapServerResource
+
+    private fun getValidActiveDirectory() = ActiveDirectory("cn=admin", "password", "localhost:10389", "dc=root")
+
+    private fun getInvalidActiveDirectory() = ActiveDirectory("cn=admin", "dsghkjfgh", "localhost:4711", "dc=root")
 
     @BeforeAll
     fun startLdap() {
@@ -111,11 +113,27 @@ class ActiveDirectoryTests {
             val expectedFilter: String? = null
     )
 
+    @Test
+    fun `connect to valid Active Directory`() {
+        // Arrange
+
+        // Act & Assert
+        Assertions.assertDoesNotThrow { getValidActiveDirectory() }
+    }
+
+    @Test
+    fun `connect to invalid Active Directory`() {
+        // Arrange
+
+        // Act & Assert
+        assertThrows<ActiveDirectory.ConnectionException> { getInvalidActiveDirectory() }
+    }
+
     @ParameterizedTest
     @MethodSource("validUserSearchProvider")
     fun `search valid users`(testData: AccountTestData) {
         // Arrange
-        val activeDirectory = ActiveDirectory("cn=admin", "password", "localhost:10389", "dc=root")
+        val activeDirectory = getValidActiveDirectory()
 
         // Act
         val users = activeDirectory.getUsers(testData.value, testData.searchScope)
@@ -134,7 +152,7 @@ class ActiveDirectoryTests {
     @MethodSource("invalidUserSearchProvider")
     fun `search invalid users`(testData: AccountTestData) {
         // Arrange
-        val activeDirectory = ActiveDirectory("cn=admin", "password", "localhost:10389", "dc=root")
+        val activeDirectory = getValidActiveDirectory()
 
         // Act
         val users = activeDirectory.getUsers(testData.value, testData.searchScope)
