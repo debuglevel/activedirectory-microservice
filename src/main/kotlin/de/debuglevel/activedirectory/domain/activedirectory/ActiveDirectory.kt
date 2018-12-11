@@ -20,7 +20,7 @@ class ActiveDirectory(username: String,
 
     private var dirContext: DirContext
     private val searchControls: SearchControls
-    private val returnAttributes = arrayOf("sAMAccountName", "givenName", "cn", "mail")
+    private val returnAttributes = arrayOf("sAMAccountName", "givenName", "sn", "cn", "mail", "displayName", "userAccountControl")
 
     init {
         val properties: Properties = Properties()
@@ -90,14 +90,20 @@ class ActiveDirectory(username: String,
                 .map {
                     val samaaccountname = it.attributes.get("samaccountname").toString().substringAfter(": ")
                     val givenname = it.attributes.get("givenname")?.toString()?.substringAfter(": ")
-                    val mail = it.attributes.get("mail")?.toString()?.substringAfter(": ")
-                    val cn = it.attributes.get("cn")?.toString()?.substringAfter(": ")
+                    val mailaddress = it.attributes.get("mail")?.toString()?.substringAfter(": ")
+                    val commonName = it.attributes.get("cn")?.toString()?.substringAfter(": ")
+                    val surname = it.attributes.get("sn")?.toString()?.substringAfter(": ")
+                    val displayName = it.attributes.get("displayName")?.toString()?.substringAfter(": ")
+                    val userAccountControl = it.attributes.get("userAccountControl")?.toString()?.substringAfter(": ")?.toIntOrNull()
 
                     User(
                             samaaccountname,
                             givenname,
-                            mail,
-                            cn)
+                            mailaddress,
+                            commonName,
+                            surname,
+                            displayName,
+                            userAccountControl)
                 }
                 .onEach { logger.debug { "Got user $it" } }
                 .toList()
