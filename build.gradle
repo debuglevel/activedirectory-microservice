@@ -71,6 +71,9 @@ dependencies {
     // JSON
     compile 'com.google.code.gson:gson:2.8.5'
 
+    // LDAP In-Memory server
+    testCompile  group: 'com.github.trevershick', name: 'ldap-test-utils', version: '2.0.1'
+
     // khttp (HTTP client)
     //compile 'com.github.jkcclemens:khttp:-SNAPSHOT'
 
