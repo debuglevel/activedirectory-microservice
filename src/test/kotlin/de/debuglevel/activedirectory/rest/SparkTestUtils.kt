@@ -30,7 +30,7 @@ object SparkTestUtils {
         val serviceClass = service::class.java
         val initializedField = serviceClass.getDeclaredField("initialized")
         initializedField.isAccessible = true
-        val initialized = initializedField.get(service) as Boolean
+        val initialized = initializedField.getBoolean(service)
 
         return initialized
     }
