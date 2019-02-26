@@ -5,8 +5,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import spark.Spark
-import java.io.IOException
-import java.net.ServerSocket
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -29,17 +27,5 @@ class MainKtTest {
     @AfterAll
     fun stopServer() {
         SparkTestUtils.awaitShutdown()
-    }
-
-    private fun isLocalPortInUse(port: Int): Boolean {
-        return try {
-            // ServerSocket try to open a LOCAL port
-            ServerSocket(port).close()
-            // local port can be opened, it's available
-            false
-        } catch (e: IOException) {
-            // local port cannot be opened, it's in use
-            true
-        }
     }
 }
