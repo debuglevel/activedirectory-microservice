@@ -27,7 +27,7 @@ plugins {
 }
 
 group 'de.debuglevel.activedirectory'
-version '0.0.2-SNAPSHOT'
+version '0.0.2'
 
 // application plugin configuration
 applicationName = "Active Directory Microservice"
