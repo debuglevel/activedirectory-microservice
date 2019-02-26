@@ -23,7 +23,10 @@ object UserController {
                         user.username,
                         user.givenname,
                         user.mail,
-                        user.cn)
+                        user.cn,
+                        user.sn,
+                        user.displayName,
+                        user.disabled)
 
                 type(contentType = "application/json")
                 JsonTransformer.render(userDTO)
