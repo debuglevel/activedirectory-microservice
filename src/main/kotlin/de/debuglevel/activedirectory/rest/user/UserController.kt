@@ -15,10 +15,9 @@ object UserController {
             val username = params(":username")
 
             try {
-                val users = ActiveDirectory(Configuration.username, Configuration.password, Configuration.server, Configuration.searchBase)
-                        .getUsers(username, SearchScope.Username)
+                val user = ActiveDirectory(Configuration.username, Configuration.password, Configuration.server, Configuration.searchBase)
+                        .getUser(username, SearchScope.Username)
 
-                val user = users.first()
                 val userDTO = UserDTO(
                         user.username,
                         user.givenname,
@@ -30,13 +29,18 @@ object UserController {
 
                 type(contentType = "application/json")
                 JsonTransformer.render(userDTO)
-            } catch (e: NoSuchElementException) {
+            } catch (e: ActiveDirectory.NoUserFoundException) {
                 logger.info("User with username '$username' does not exist.")
                 response.type("application/json")
                 response.status(404)
                 "{\"message\":\"username '$username' does not exist\"}"
+            } catch (e: ActiveDirectory.MoreThanOneResultException) {
+                logger.warn("User with username '$username' is ambiguous.")
+                response.type("application/json")
+                response.status(502)
+                "{\"message\":\"username '$username' is ambiguous\"}"
             } catch (e: ActiveDirectory.ConnectionException) {
-                logger.info("Could not connect to Active Directory.")
+                logger.warn("Could not connect to Active Directory.")
                 response.type("application/json")
                 response.status(502)
                 "{\"message\":\"could not connect to Active Directory\"}"

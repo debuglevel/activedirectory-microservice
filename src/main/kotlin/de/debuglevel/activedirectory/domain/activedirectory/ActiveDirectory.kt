@@ -66,7 +66,7 @@ class ActiveDirectory(username: String,
     }
 
     /**
-     * Gets an user from the Active Directory by username/email id for given search base
+     * Gets users from the Active Directory by username/email id for given search base
      *
      * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email
      * @param searchBy a [java.lang.String] object - scope of search by username or by email id
@@ -81,6 +81,29 @@ class ActiveDirectory(username: String,
 
         logger.debug { "Got ${users.count()} users for '$searchValue' by $searchBy..." }
         return users
+    }
+
+    /**
+     * Gets an user from the Active Directory by username/email id for given search base
+     *
+     * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email
+     * @param searchBy a [java.lang.String] object - scope of search by username or by email id
+     * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
+     * @throws NamingException
+     */
+    fun getUser(searchValue: String, searchBy: SearchScope): User {
+        logger.debug { "Getting user '$searchValue' by $searchBy..." }
+
+        val users = getUsers(searchValue, searchBy)
+
+        if (users.count() > 1) {
+            throw MoreThanOneResultException(users)
+        } else if (users.isEmpty()) {
+            throw NoUserFoundException()
+        }
+
+        val user = users.first()
+        return user
     }
 
     private fun buildUsers(results: NamingEnumeration<SearchResult>): List<User> {
@@ -170,4 +193,6 @@ class ActiveDirectory(username: String,
     }
 
     class ConnectionException(e: Exception) : Exception("Could not connect to LDAP server", e)
+    class MoreThanOneResultException(users: List<User>) : Exception("Found more than one result: $users")
+    class NoUserFoundException : Exception("No such user found")
 }
