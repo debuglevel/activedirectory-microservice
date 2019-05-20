@@ -3,9 +3,11 @@ package de.debuglevel.activedirectory.rest
 import com.natpryce.konfig.*
 import com.natpryce.konfig.Configuration
 import com.natpryce.konfig.ConfigurationProperties.Companion.systemProperties
+import mu.KotlinLogging
 import java.io.File
 
 object Configuration {
+    private val logger = KotlinLogging.logger {}
     val configuration: Configuration
 
     init {
@@ -18,7 +20,9 @@ object Configuration {
                 ConfigurationProperties.fromOptionalFile(File("configuration.properties"))
 
         val defaultsPropertiesFilename = "defaults.properties"
+        logger.info { ClassLoader.getSystemClassLoader().getResource(defaultsPropertiesFilename) }
         if (ClassLoader.getSystemClassLoader().getResource(defaultsPropertiesFilename) != null) {
+
             config = config overriding
                     ConfigurationProperties.fromResource(defaultsPropertiesFilename)
         }
