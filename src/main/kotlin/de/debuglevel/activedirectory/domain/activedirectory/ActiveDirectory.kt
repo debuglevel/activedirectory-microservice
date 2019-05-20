@@ -84,6 +84,19 @@ class ActiveDirectory(username: String,
     }
 
     /**
+     * Gets all users from the Active Directory for given search base
+     *
+     * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
+     * @throws NamingException
+     */
+    fun getUsers(): List<User> {
+        logger.debug { "Getting all users..." }
+
+        val users = getUsers("*", SearchScope.Username)
+        return users
+    }
+
+    /**
      * Gets an user from the Active Directory by username/email id for given search base
      *
      * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email

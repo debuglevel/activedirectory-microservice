@@ -32,8 +32,9 @@ class RestEndpoint {
         apiVersion("1", true)
         {
             path("/users") {
+                get("", "application/json", UserController.getList())
+                get("/", "application/json", UserController.getList())
                 //get("/", "text/html", UserController.getListHtml())
-                //get("/", "application/json", UserController.getList())
                 //post("/", function = UserController.postOne())
 
                 path("/:username") {

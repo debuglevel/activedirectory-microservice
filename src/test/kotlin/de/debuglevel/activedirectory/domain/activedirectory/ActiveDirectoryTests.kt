@@ -34,6 +34,18 @@ import java.util.stream.Stream
                                 LdapAttribute(name = "givenname", value = arrayOf("Max")),
                                 LdapAttribute(name = "mail", value = arrayOf("max@mustermann.de"))
                         )
+                ),
+                LdapEntry
+                (
+                        dn = "cn=Alex Aloah,dc=root",
+                        objectclass = arrayOf("User"),
+                        attributes = arrayOf
+                        (
+                                LdapAttribute(name = "objectCategory", value = arrayOf("Person")),
+                                LdapAttribute(name = "samaccountname", value = arrayOf("alexaloah")),
+                                LdapAttribute(name = "givenname", value = arrayOf("Alex")),
+                                LdapAttribute(name = "mail", value = arrayOf("alex@aloah.de"))
+                        )
                 )
         ),
         // bypass schema validation; so we can use arbitrary attributes and objectclasses
@@ -143,9 +155,24 @@ class ActiveDirectoryTests {
         assertThat(users).contains(testData.user)
     }
 
+    @Test
+    fun `get all users`() {
+        // Arrange
+        val activeDirectory = getValidActiveDirectory()
+
+        // Act
+        val users = activeDirectory.getUsers()
+
+        //Assert
+        assertThat(users).hasSize(2)
+        validUserSearchProvider().forEach { assertThat(users).contains(it.user) }
+    }
+
     fun validUserSearchProvider() = Stream.of(
             AccountTestData(value = "maxmustermann", searchScope = SearchScope.Username, user = User("maxmustermann", "Max", "max@mustermann.de", "Max Mustermann")),
-            AccountTestData(value = "max@mustermann.de", searchScope = SearchScope.Email, user = User("maxmustermann", "Max", "max@mustermann.de", "Max Mustermann"))
+            AccountTestData(value = "max@mustermann.de", searchScope = SearchScope.Email, user = User("maxmustermann", "Max", "max@mustermann.de", "Max Mustermann")),
+            AccountTestData(value = "alexaloah", searchScope = SearchScope.Username, user = User("alexaloah", "Alex", "alex@aloah.de", "Alex Aloah")),
+            AccountTestData(value = "alex@aloah.de", searchScope = SearchScope.Email, user = User("alexaloah", "Alex", "alex@aloah.de", "Alex Aloah"))
     )
 
     @ParameterizedTest

@@ -48,6 +48,34 @@ object UserController {
         }
     }
 
+    fun getList(): RouteHandler.() -> String {
+        return {
+            try {
+                val users = ActiveDirectory(Configuration.username, Configuration.password, Configuration.server, Configuration.searchBase)
+                        .getUsers()
+
+                val usersDTO = users.map {
+                    UserDTO(
+                            it.username,
+                            it.givenname,
+                            it.mail,
+                            it.cn,
+                            it.sn,
+                            it.displayName,
+                            it.disabled)
+                }
+
+                type(contentType = "application/json")
+                JsonTransformer.render(usersDTO)
+            } catch (e: ActiveDirectory.ConnectionException) {
+                logger.info("Could not connect to Active Directory.")
+                response.type("application/json")
+                response.status(502)
+                "{\"message\":\"could not connect to Active Directory\"}"
+            }
+        }
+    }
+
 //    fun getOneHtml(): RouteHandler.() -> String {
 //        return {
 //            val greetingId = request.params(":greetingId").toInt()
