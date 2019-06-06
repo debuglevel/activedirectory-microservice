@@ -4,8 +4,9 @@ services:
     build: .
     image: activedirectory-microservice
     ports:
-    - "80:80"
+      - "80:80"
     environment:
-    - ACTIVEDIRECTORY_USERNAME=bindingUsername
-    - ACTIVEDIRECTORY_PASSWORD=bindingPassword
-    - ACTIVEDIRECTORY_SERVER=domainController.com
+      - ACTIVEDIRECTORY_USERNAME=bindingUsername
+      - ACTIVEDIRECTORY_PASSWORD=bindingPassword
+      - ACTIVEDIRECTORY_SERVER=domainController.com
+      - ACTIVEDIRECTORY_SEARCHBASE=dc=myDomain,dc=myTld

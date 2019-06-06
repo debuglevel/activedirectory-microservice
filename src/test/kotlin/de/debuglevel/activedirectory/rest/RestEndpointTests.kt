@@ -31,7 +31,7 @@ class RestEndpointTests {
         // Arrange
 
         // Act
-        val response = ApiTestUtils.request("GET", "/users/", null)
+        val response = ApiTestUtils.request("GET", "/", null)
 
         // Assert
         // HTTP Codes begin from "100". So something from 100 and above was probably a response to a HTTP request
