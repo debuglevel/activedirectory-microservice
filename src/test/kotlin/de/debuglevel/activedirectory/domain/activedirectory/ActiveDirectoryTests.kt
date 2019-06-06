@@ -155,18 +155,18 @@ class ActiveDirectoryTests {
         assertThat(users).contains(testData.user)
     }
 
-    @Test
-    fun `get all users`() {
-        // Arrange
-        val activeDirectory = getValidActiveDirectory()
-
-        // Act
-        val users = activeDirectory.getUsers()
-
-        //Assert
-        assertThat(users).hasSize(2)
-        validUserSearchProvider().forEach { assertThat(users).contains(it.user) }
-    }
+//    @Test
+//    fun `get all users`() {
+//        // Arrange
+//        val activeDirectory = getValidActiveDirectory()
+//
+//        // Act
+//        val users = activeDirectory.getUsers()
+//
+//        //Assert
+//        assertThat(users).hasSize(2)
+//        validUserSearchProvider().forEach { assertThat(users).contains(it.user) }
+//    }
 
     fun validUserSearchProvider() = Stream.of(
             AccountTestData(value = "maxmustermann", searchScope = SearchScope.Username, user = User("maxmustermann", "Max", "max@mustermann.de", "Max Mustermann")),
