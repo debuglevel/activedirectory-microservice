@@ -11,6 +11,7 @@ import javax.naming.directory.InitialDirContext
 import javax.naming.directory.SearchControls
 import javax.naming.directory.SearchResult
 
+
 // see original at https://myjeeva.com/querying-active-directory-using-java.html
 class ActiveDirectory(username: String,
                       password: String,
@@ -20,7 +21,8 @@ class ActiveDirectory(username: String,
 
     private var dirContext: DirContext
     private val searchControls: SearchControls
-    private val returnAttributes = arrayOf("sAMAccountName", "givenName", "sn", "cn", "mail", "displayName", "userAccountControl")
+    private val returnAttributes =
+        arrayOf("sAMAccountName", "givenName", "sn", "cn", "mail", "displayName", "userAccountControl", "lastLogon")
 
     init {
         val properties: Properties = Properties()
@@ -90,6 +92,7 @@ class ActiveDirectory(username: String,
      * @throws NamingException
      */
     fun getUsers(): List<User> {
+        TODO("Does not work with more then 1000 users due to missing paging")
         logger.debug { "Getting all users..." }
 
         val users = getUsers("*", SearchScope.Username)
@@ -131,6 +134,15 @@ class ActiveDirectory(username: String,
                     val surname = it.attributes.get("sn")?.toString()?.substringAfter(": ")
                     val displayName = it.attributes.get("displayName")?.toString()?.substringAfter(": ")
                     val userAccountControl = it.attributes.get("userAccountControl")?.toString()?.substringAfter(": ")?.toIntOrNull()
+                    val lastLogon = {
+                        val lastLogonTimestamp =
+                            it.attributes.get("lastLogon")?.toString()?.substringAfter(": ")?.toLong()
+                        if (lastLogonTimestamp != null) {
+                            convertLdapTimestampToDate(lastLogonTimestamp)
+                        } else {
+                            null
+                        }
+                    }()
 
                     User(
                             samaaccountname,
@@ -139,7 +151,9 @@ class ActiveDirectory(username: String,
                             commonName,
                             surname,
                             displayName,
-                            userAccountControl)
+                        userAccountControl,
+                        lastLogon
+                    )
                 }
                 .onEach { logger.debug { "Got user $it" } }
                 .toList()
@@ -147,6 +161,15 @@ class ActiveDirectory(username: String,
         logger.debug { "Built ${users.count()} users." }
 
         return users
+    }
+
+    private fun convertLdapTimestampToDate(timestamp: Long): GregorianCalendar {
+        // TODO: does not respect time zones for now
+        val fileTime = timestamp / 10000L - +11644473600000L
+        val date = Date(fileTime)
+        val calendar = GregorianCalendar()
+        calendar.time = date
+        return calendar
     }
 
     /**

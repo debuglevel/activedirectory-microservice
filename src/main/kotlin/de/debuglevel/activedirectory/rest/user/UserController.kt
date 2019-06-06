@@ -7,6 +7,7 @@ import de.debuglevel.activedirectory.rest.responsetransformer.JsonTransformer
 import mu.KotlinLogging
 import spark.kotlin.RouteHandler
 
+
 object UserController {
     private val logger = KotlinLogging.logger {}
 
@@ -18,14 +19,7 @@ object UserController {
                 val user = ActiveDirectory(Configuration.username, Configuration.password, Configuration.server, Configuration.searchBase)
                         .getUser(username, SearchScope.Username)
 
-                val userDTO = UserDTO(
-                        user.username,
-                        user.givenname,
-                        user.mail,
-                        user.cn,
-                        user.sn,
-                        user.displayName,
-                        user.disabled)
+                val userDTO = UserDTO(user)
 
                 type(contentType = "application/json")
                 JsonTransformer.render(userDTO)
@@ -55,14 +49,7 @@ object UserController {
                         .getUsers()
 
                 val usersDTO = users.map {
-                    UserDTO(
-                            it.username,
-                            it.givenname,
-                            it.mail,
-                            it.cn,
-                            it.sn,
-                            it.displayName,
-                            it.disabled)
+                    UserDTO(it)
                 }
 
                 type(contentType = "application/json")
