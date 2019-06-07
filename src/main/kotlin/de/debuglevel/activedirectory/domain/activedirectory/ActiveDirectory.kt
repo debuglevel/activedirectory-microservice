@@ -47,27 +47,6 @@ class ActiveDirectory(username: String,
     }
 
     /**
-     * Search the Active Directory by username/email id for given search base
-     *
-     * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email
-     * @param searchBy a [java.lang.String] object - scope of search by username or by email id
-     * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
-     * @throws NamingException
-     */
-    private fun searchUser(searchValue: String, searchBy: SearchScope): NamingEnumeration<SearchResult> {
-        logger.debug { "Searching for user '$searchValue' by $searchBy..." }
-
-        val filter = getFilter(searchValue, searchBy)
-
-        return try {
-            this.dirContext.search(this.searchBase, filter, this.searchControls)
-        } catch (e: NamingException) {
-            logger.error(e) { "Failed searching for user." }
-            throw e
-        }
-    }
-
-    /**
      * Gets users from the Active Directory by username/email id for given search base
      *
      * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email
@@ -78,7 +57,16 @@ class ActiveDirectory(username: String,
     fun getUsers(searchValue: String, searchBy: SearchScope): List<User> {
         logger.debug { "Getting user '$searchValue' by $searchBy..." }
 
-        val results = searchUser(searchValue, searchBy)
+        val filter = getFilter(searchValue, searchBy)
+
+        val results = try {
+            logger.debug { "Searching for user '$searchValue' by $searchBy..." }
+            dirContext.search(searchBase, filter, searchControls)
+        } catch (e: NamingException) {
+            logger.error(e) { "Failed searching for user." }
+            throw e
+        }
+
         val users = buildUsers(results)
 
         logger.debug { "Got ${users.count()} users for '$searchValue' by $searchBy..." }
