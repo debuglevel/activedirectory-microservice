@@ -2,14 +2,14 @@ package de.debuglevel.activedirectory.domain.activedirectory
 
 import mu.KotlinLogging
 import java.io.Closeable
+import java.io.IOException
 import java.util.*
 import javax.naming.Context
 import javax.naming.NamingEnumeration
 import javax.naming.NamingException
-import javax.naming.directory.DirContext
-import javax.naming.directory.InitialDirContext
 import javax.naming.directory.SearchControls
 import javax.naming.directory.SearchResult
+import javax.naming.ldap.*
 
 
 // see original at https://myjeeva.com/querying-active-directory-using-java.html
@@ -19,10 +19,11 @@ class ActiveDirectory(username: String,
                       private val searchBase: String) : Closeable {
     private val logger = KotlinLogging.logger {}
 
-    private var dirContext: DirContext
+    private var ldapContext: LdapContext
     private val searchControls: SearchControls
     private val returnAttributes =
         arrayOf("sAMAccountName", "givenName", "sn", "cn", "mail", "displayName", "userAccountControl", "lastLogon")
+    private val pageSize = 1000
 
     init {
         val properties: Properties = Properties()
@@ -34,7 +35,7 @@ class ActiveDirectory(username: String,
         // initializing Active Directory LDAP connection
         try {
             logger.debug { "Initialize LDAP connection..." }
-            dirContext = InitialDirContext(properties)
+            ldapContext = InitialLdapContext(properties, null)
         } catch (e: Exception) {
             logger.error(e) { "Failed initializing LDAP connection." }
             throw ConnectionException(e)
@@ -55,21 +56,61 @@ class ActiveDirectory(username: String,
      * @throws NamingException
      */
     fun getUsers(searchValue: String, searchBy: SearchScope): List<User> {
-        logger.debug { "Getting user '$searchValue' by $searchBy..." }
+        val users = ArrayList<User>()
 
-        val filter = getFilter(searchValue, searchBy)
+        try {
+            val filter = getFilter(searchValue, searchBy)
 
-        val results = try {
-            logger.debug { "Searching for user '$searchValue' by $searchBy..." }
-            dirContext.search(searchBase, filter, searchControls)
+            // Activate paged results
+            var cookie: ByteArray? = null
+            ldapContext.requestControls = arrayOf<Control>(PagedResultsControl(pageSize, Control.NONCRITICAL))
+
+            do {
+                logger.debug { "Requesting page..." }
+
+                val results = ldapContext.search(searchBase, filter, searchControls)
+
+                while (results.hasMoreElements()) {
+                    val result = results.nextElement()
+                    val user = buildUser(result)
+                    users.add(user)
+                }
+
+                // Examine the paged results control response
+                val controls = ldapContext.responseControls
+                if (controls != null) {
+                    val pagedResultsResponseControls = controls
+                        .filter { it is PagedResultsResponseControl }
+                        .map { it as PagedResultsResponseControl }
+                    for (pagedResultsResponseControl in pagedResultsResponseControls) {
+                        val resultSize = if (pagedResultsResponseControl.resultSize != 0) {
+                            "${pagedResultsResponseControl.resultSize}"
+                        } else {
+                            "unknown"
+                        }
+
+                        logger.debug { "Page ended (total: $resultSize)" }
+
+                        cookie = pagedResultsResponseControl.cookie
+                    }
+                } else {
+                    logger.debug("No controls were sent from the server")
+                }
+
+                // Re-activate paged results
+                ldapContext.requestControls = arrayOf<Control>(PagedResultsControl(pageSize, cookie, Control.CRITICAL))
+
+                logger.debug { "Fetched a total of ${users.count()} entries." }
+            } while (cookie != null)
+
         } catch (e: NamingException) {
-            logger.error(e) { "Failed searching for user." }
-            throw e
+            logger.error(e) { "PagedSearch failed." }
+        } catch (e: IOException) {
+            logger.error(e) { "PagedSearch failed." }
+        } catch (e: Exception) {
+            logger.error(e) { "PagedSearch failed." }
         }
 
-        val users = buildUsers(results)
-
-        logger.debug { "Got ${users.count()} users for '$searchValue' by $searchBy..." }
         return users
     }
 
@@ -80,10 +121,12 @@ class ActiveDirectory(username: String,
      * @throws NamingException
      */
     fun getUsers(): List<User> {
-        TODO("Does not work with more then 1000 users due to missing paging")
+        //TODO("Does not work with more then 1000 users due to missing paging")
         logger.debug { "Getting all users..." }
 
         val users = getUsers("*", SearchScope.Username)
+
+        logger.debug { "Got ${users.count()} users..." }
         return users
     }
 
@@ -115,33 +158,7 @@ class ActiveDirectory(username: String,
 
         val users = results.asSequence()
                 .map {
-                    val samaaccountname = it.attributes.get("samaccountname").toString().substringAfter(": ")
-                    val givenname = it.attributes.get("givenname")?.toString()?.substringAfter(": ")
-                    val mailaddress = it.attributes.get("mail")?.toString()?.substringAfter(": ")
-                    val commonName = it.attributes.get("cn")?.toString()?.substringAfter(": ")
-                    val surname = it.attributes.get("sn")?.toString()?.substringAfter(": ")
-                    val displayName = it.attributes.get("displayName")?.toString()?.substringAfter(": ")
-                    val userAccountControl = it.attributes.get("userAccountControl")?.toString()?.substringAfter(": ")?.toIntOrNull()
-                    val lastLogon = {
-                        val lastLogonTimestamp =
-                            it.attributes.get("lastLogon")?.toString()?.substringAfter(": ")?.toLong()
-                        if (lastLogonTimestamp != null) {
-                            convertLdapTimestampToDate(lastLogonTimestamp)
-                        } else {
-                            null
-                        }
-                    }()
-
-                    User(
-                            samaaccountname,
-                            givenname,
-                            mailaddress,
-                            commonName,
-                            surname,
-                            displayName,
-                        userAccountControl,
-                        lastLogon
-                    )
+                    buildUser(it)
                 }
                 .onEach { logger.debug { "Got user $it" } }
                 .toList()
@@ -149,6 +166,37 @@ class ActiveDirectory(username: String,
         logger.debug { "Built ${users.count()} users." }
 
         return users
+    }
+
+    private fun buildUser(it: SearchResult): User {
+        val samaaccountname = it.attributes.get("samaccountname").toString().substringAfter(": ")
+        val givenname = it.attributes.get("givenname")?.toString()?.substringAfter(": ")
+        val mailaddress = it.attributes.get("mail")?.toString()?.substringAfter(": ")
+        val commonName = it.attributes.get("cn")?.toString()?.substringAfter(": ")
+        val surname = it.attributes.get("sn")?.toString()?.substringAfter(": ")
+        val displayName = it.attributes.get("displayName")?.toString()?.substringAfter(": ")
+        val userAccountControl =
+            it.attributes.get("userAccountControl")?.toString()?.substringAfter(": ")?.toIntOrNull()
+        val lastLogon = {
+            val lastLogonTimestamp =
+                it.attributes.get("lastLogon")?.toString()?.substringAfter(": ")?.toLong()
+            if (lastLogonTimestamp != null) {
+                convertLdapTimestampToDate(lastLogonTimestamp)
+            } else {
+                null
+            }
+        }()
+
+        return User(
+            samaaccountname,
+            givenname,
+            mailaddress,
+            commonName,
+            surname,
+            displayName,
+            userAccountControl,
+            lastLogon
+        )
     }
 
     private fun convertLdapTimestampToDate(timestamp: Long): GregorianCalendar {
@@ -166,7 +214,7 @@ class ActiveDirectory(username: String,
     override fun close() {
         try {
             logger.debug { "Closing LDAP connection..." }
-            dirContext.close()
+            ldapContext.close()
         } catch (e: NamingException) {
             logger.error(e) { "Failed closing LDAP connection." }
         }
