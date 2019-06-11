@@ -43,6 +43,11 @@ class RestEndpoint {
                     //get("/", "text/html", UserController.getOneHtml())
                 }
             }
+
+            path("/xml/users") {
+                get("", "*/*", UserController.getListXml())
+                get("/", "*/*", UserController.getListXml())
+            }
         }
 
         // add loggers

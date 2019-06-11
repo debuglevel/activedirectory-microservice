@@ -4,6 +4,7 @@ import de.debuglevel.activedirectory.domain.activedirectory.ActiveDirectory
 import de.debuglevel.activedirectory.domain.activedirectory.SearchScope
 import de.debuglevel.activedirectory.rest.Configuration
 import de.debuglevel.activedirectory.rest.responsetransformer.JsonTransformer
+import de.debuglevel.activedirectory.rest.responsetransformer.XmlTransformer
 import mu.KotlinLogging
 import spark.kotlin.RouteHandler
 
@@ -57,6 +58,32 @@ object UserController {
             } catch (e: ActiveDirectory.ConnectionException) {
                 logger.info("Could not connect to Active Directory.")
                 response.type("application/json")
+                response.status(502)
+                "{\"message\":\"could not connect to Active Directory\"}"
+            }
+        }
+    }
+
+    fun getListXml(): RouteHandler.() -> String {
+        return {
+            try {
+                val users = ActiveDirectory(
+                    Configuration.username,
+                    Configuration.password,
+                    Configuration.server,
+                    Configuration.searchBase
+                )
+                    .getUsers()
+
+                val usersDTO = users.map {
+                    UserDTO(it)
+                }
+
+                type(contentType = "application/xml")
+                XmlTransformer.render(usersDTO)
+            } catch (e: ActiveDirectory.ConnectionException) {
+                logger.info("Could not connect to Active Directory.")
+                response.type("application/xml")
                 response.status(502)
                 "{\"message\":\"could not connect to Active Directory\"}"
             }
