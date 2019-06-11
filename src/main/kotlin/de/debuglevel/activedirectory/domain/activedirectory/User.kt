@@ -11,7 +11,8 @@ data class User(
     val sn: String? = null,
     val displayName: String? = null,
     val userAccountControl: Int? = null,
-    val lastLogon: GregorianCalendar? = null
+    val lastLogon: GregorianCalendar? = null,
+    val whenCreated: GregorianCalendar? = null
 ) {
     /**
      * Account is disabled if bitwise 2 is set
@@ -21,4 +22,7 @@ data class User(
 
     val lastLogonFormatted: String?
         get() = this.lastLogon?.toZonedDateTime()?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+
+    val whenCreatedFormatted: String?
+        get() = this.whenCreated?.toZonedDateTime()?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 }

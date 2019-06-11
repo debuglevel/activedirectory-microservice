@@ -3,6 +3,8 @@ package de.debuglevel.activedirectory.domain.activedirectory
 import mu.KotlinLogging
 import java.io.Closeable
 import java.io.IOException
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import javax.naming.Context
 import javax.naming.NamingEnumeration
@@ -22,7 +24,17 @@ class ActiveDirectory(username: String,
     private var ldapContext: LdapContext
     private val searchControls: SearchControls
     private val returnAttributes =
-        arrayOf("sAMAccountName", "givenName", "sn", "cn", "mail", "displayName", "userAccountControl", "lastLogon")
+        arrayOf(
+            "sAMAccountName",
+            "givenName",
+            "sn",
+            "cn",
+            "mail",
+            "displayName",
+            "userAccountControl",
+            "lastLogon",
+            "whenCreated"
+        )
     private val pageSize = 1000
 
     init {
@@ -186,6 +198,15 @@ class ActiveDirectory(username: String,
                 null
             }
         }()
+        val whenCreated = {
+            val whenCreatedTimestamp =
+                it.attributes.get("whenCreated")?.toString()?.substringAfter(": ")
+            if (whenCreatedTimestamp != null) {
+                convertLdapTimestampToDate(whenCreatedTimestamp)
+            } else {
+                null
+            }
+        }()
 
         return User(
             samaaccountname,
@@ -195,16 +216,25 @@ class ActiveDirectory(username: String,
             surname,
             displayName,
             userAccountControl,
-            lastLogon
+            lastLogon,
+            whenCreated
         )
     }
 
     private fun convertLdapTimestampToDate(timestamp: Long): GregorianCalendar {
-        // TODO: does not respect time zones for now
+        // TODO: unknown if respects time zones
         val fileTime = timestamp / 10000L - +11644473600000L
         val date = Date(fileTime)
         val calendar = GregorianCalendar()
         calendar.time = date
+        return calendar
+    }
+
+    private fun convertLdapTimestampToDate(timestamp: String): GregorianCalendar {
+        // TODO: unknown if respects time zones
+        val dateTimeFormatter = DateTimeFormatter.ofPattern("uuuuMMddHHmmss[,S][.S]X")
+        val zonedDateTime = OffsetDateTime.parse(timestamp, dateTimeFormatter).toZonedDateTime()
+        val calendar = GregorianCalendar.from(zonedDateTime)
         return calendar
     }
 

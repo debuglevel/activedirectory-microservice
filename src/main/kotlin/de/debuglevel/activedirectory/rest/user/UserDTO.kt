@@ -9,7 +9,8 @@ data class UserDTO(val username: String,
                    val sn: String?,
                    val displayName: String?,
                    val disabled: Boolean?,
-                   val lastLogon: String?
+                   val lastLogon: String?,
+                   val whenCreated: String?
 ) {
     constructor(user: User) : this(
         user.username,
@@ -19,7 +20,8 @@ data class UserDTO(val username: String,
         user.sn,
         user.displayName,
         user.disabled,
-        user.lastLogonFormatted
+        user.lastLogonFormatted,
+        user.whenCreatedFormatted
     )
 
 }
