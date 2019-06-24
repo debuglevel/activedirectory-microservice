@@ -192,7 +192,7 @@ class ActiveDirectory(username: String,
         val lastLogon = {
             val lastLogonTimestamp =
                 it.attributes.get("lastLogon")?.toString()?.substringAfter(": ")?.toLong()
-            if (lastLogonTimestamp != null) {
+            if (lastLogonTimestamp != null && lastLogonTimestamp != 0L) {
                 convertLdapTimestampToDate(lastLogonTimestamp)
             } else {
                 null
