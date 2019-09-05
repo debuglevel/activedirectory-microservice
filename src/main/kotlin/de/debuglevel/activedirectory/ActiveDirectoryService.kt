@@ -1,11 +1,14 @@
-package de.debuglevel.activedirectory.domain.activedirectory
+package de.debuglevel.activedirectory
 
+import io.micronaut.context.annotation.Property
 import mu.KotlinLogging
 import java.io.Closeable
 import java.io.IOException
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import javax.annotation.PostConstruct
+import javax.inject.Singleton
 import javax.naming.Context
 import javax.naming.NamingEnumeration
 import javax.naming.NamingException
@@ -15,13 +18,16 @@ import javax.naming.ldap.*
 
 
 // see original at https://myjeeva.com/querying-active-directory-using-java.html
-class ActiveDirectory(username: String,
-                      password: String,
-                      private val domainController: String,
-                      private val searchBase: String) : Closeable {
+@Singleton
+class ActiveDirectoryService(
+    @Property(name = "app.activedirectory.username") private val username: String,
+    @Property(name = "app.activedirectory.password") private val password: String,
+    @Property(name = "app.activedirectory.server") private val domainController: String,
+    @Property(name = "app.activedirectory.searchbase") private val searchBase: String
+) : Closeable {
     private val logger = KotlinLogging.logger {}
 
-    private var ldapContext: LdapContext
+    private lateinit var ldapContext: LdapContext
     private val searchControls: SearchControls
     private val returnAttributes =
         arrayOf(
@@ -38,6 +44,14 @@ class ActiveDirectory(username: String,
     private val pageSize = 1000
 
     init {
+        // initializing search controls
+        searchControls = SearchControls()
+        searchControls.searchScope = SearchControls.SUBTREE_SCOPE
+        searchControls.returningAttributes = returnAttributes
+    }
+
+    @PostConstruct
+    fun initialize() {
         val properties: Properties = Properties()
         properties[Context.INITIAL_CONTEXT_FACTORY] = "com.sun.jndi.ldap.LdapCtxFactory"
         properties[Context.PROVIDER_URL] = "LDAP://$domainController"
@@ -46,17 +60,12 @@ class ActiveDirectory(username: String,
 
         // initializing Active Directory LDAP connection
         try {
-            logger.debug { "Initialize LDAP connection..." }
+            logger.debug { "Initializing LDAP connection with properties $properties..." }
             ldapContext = InitialLdapContext(properties, null)
         } catch (e: Exception) {
-            logger.error(e) { "Failed initializing LDAP connection." }
+            logger.error(e) { "Initializing LDAP connection failed." }
             throw ConnectionException(e)
         }
-
-        // initializing search controls
-        searchControls = SearchControls()
-        searchControls.searchScope = SearchControls.SUBTREE_SCOPE
-        searchControls.returningAttributes = returnAttributes
     }
 
     /**
@@ -71,7 +80,10 @@ class ActiveDirectory(username: String,
         val users = ArrayList<User>()
 
         try {
-            val filter = getFilter(searchValue, searchBy)
+            val filter = getFilter(
+                searchValue,
+                searchBy
+            )
 
             // Activate paged results
             var cookie: ByteArray? = null
@@ -169,11 +181,11 @@ class ActiveDirectory(username: String,
         logger.debug { "Building users from search results..." }
 
         val users = results.asSequence()
-                .map {
-                    buildUser(it)
-                }
-                .onEach { logger.debug { "Got user $it" } }
-                .toList()
+            .map {
+                buildUser(it)
+            }
+            .onEach { logger.debug { "Got user $it" } }
+            .toList()
 
         logger.debug { "Built ${users.count()} users." }
 
@@ -284,10 +296,10 @@ class ActiveDirectory(username: String,
             logger.debug { "Build base DN for domain '$domain'..." }
 
             val dn = domain
-                    .toUpperCase()
-                    .split('.')
-                    .map { "DC=$it" }
-                    .joinToString(",")
+                .toUpperCase()
+                .split('.')
+                .map { "DC=$it" }
+                .joinToString(",")
 
             logger.debug { "Built base DN for domain '$domain': '$dn'" }
             return dn
