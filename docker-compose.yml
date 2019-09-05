@@ -10,3 +10,5 @@ services:
       - ACTIVEDIRECTORY_PASSWORD=bindingPassword
       - ACTIVEDIRECTORY_SERVER=domainController.com
       - ACTIVEDIRECTORY_SEARCHBASE=dc=myDomain,dc=myTld
+      # port 80 is actually already defined as default for docker as ENV in Dockerfile
+      - MICRONAUT_SERVER_PORT=80

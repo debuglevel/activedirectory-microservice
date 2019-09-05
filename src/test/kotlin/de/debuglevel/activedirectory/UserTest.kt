@@ -1,4 +1,4 @@
-package de.debuglevel.activedirectory.domain.activedirectory
+package de.debuglevel.activedirectory
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

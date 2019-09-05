@@ -1,4 +1,4 @@
-package de.debuglevel.activedirectory.domain.activedirectory
+package de.debuglevel.activedirectory
 
 import java.time.format.DateTimeFormatter
 import java.util.*
