@@ -1,10 +1,8 @@
 package de.debuglevel.activedirectory
 
 import io.micronaut.http.HttpResponse
-import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
-import io.micronaut.http.annotation.Produces
 import io.micronaut.security.annotation.Secured
 import io.micronaut.security.rules.SecurityRule
 import mu.KotlinLogging
@@ -34,7 +32,6 @@ class UserController(private val activeDirectoryService: ActiveDirectoryService)
     }
 
     @Get("/")
-    @Produces(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)
     fun getList(): HttpResponse<Set<UserResponse>> {
         logger.debug("Called getList()")
 
@@ -50,21 +47,4 @@ class UserController(private val activeDirectoryService: ActiveDirectoryService)
             HttpResponse.serverError(response)
         }
     }
-
-//    @Get("/")
-//    fun getXmlList(): HttpResponse<Set<UserResponse>> {
-//        logger.debug("Called getXmlList()")
-//
-//        return try {
-//            val users = activeDirectoryService.getUsers()
-//                .map {
-//                    UserResponse(it)
-//                }.toSet()
-//
-//            HttpResponse.ok(users)
-//        } catch (e: ActiveDirectoryService.ConnectionException) {
-//            val response = setOf(UserResponse(error = "Could not connect to Active Directory"))
-//            HttpResponse.serverError(response)
-//        }
-//    }
 }
