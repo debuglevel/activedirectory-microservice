@@ -1,9 +1,10 @@
 app:
   activedirectory:
-    username: myUser
-    password: myPassword
-    server: myServer.myDomain.myTld
-    searchbase: dc=myDomain,dc=myTld
+    username: cn=admin
+    password: password
+    server: localhost:10389
+    #searchbase: dc=myDomain,dc=myTld
+    searchbase: dc=root
   security:
     username: SECRET_USERNAME
     password: SECRET_PASSWORD
