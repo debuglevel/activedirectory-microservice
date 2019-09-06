@@ -205,4 +205,23 @@ class ActiveDirectoryServiceTests {
     }
 
     fun invalidUserSearchProvider() = TestDataProvider.invalidUserSearchProvider()
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
+
+        /**
+         * Just a small hack to get the LDAP server used in the tests running for manual tests.
+         * Note: IntelliJ somehow does not want to run this main() via the Gutter icon; create a Configuration instead to start it.
+         */
+        @JvmStatic
+        fun main(args: Array<String>) {
+            logger.info { "Starting up..." }
+            val obj = ActiveDirectoryServiceTests()
+            obj.startLdap()
+            logger.info { "Started LDAP server on port ${obj.ldapServer.port()}." }
+            println("Press enter to stop LDAP server")
+            readLine()
+            obj.stopLdap()
+        }
+    }
 }
