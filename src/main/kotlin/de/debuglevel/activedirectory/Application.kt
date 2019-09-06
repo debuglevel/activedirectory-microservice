@@ -16,7 +16,7 @@ import mu.KotlinLogging
 @OpenAPIDefinition(
     info = Info(
         title = "ActiveDirectory Microservice",
-        version = "0.1.0",
+        version = "0.2.0",
         description = "Microservice for managing a Microsoft Active Directory",
         license = License(name = "WTFPL 2.0", url = "http://www.wtfpl.net/"),
         contact = Contact(url = "http://debuglevel.de", name = "Marc Kohaupt", email = "debuglevel at gmail.com")
