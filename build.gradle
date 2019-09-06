@@ -51,7 +51,7 @@ group 'de.debuglevel.activedirectory'
 
 // application plugin configuration
 applicationName = "Active Directory Microservice"
-mainClassName = "de.debuglevel.activedirectory.rest.MainKt"
+mainClassName = "de.debuglevel.activedirectory.Application"
 
 repositories {
     jcenter()
