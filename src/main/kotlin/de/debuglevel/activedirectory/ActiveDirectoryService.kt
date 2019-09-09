@@ -2,12 +2,10 @@ package de.debuglevel.activedirectory
 
 import io.micronaut.context.annotation.Property
 import mu.KotlinLogging
-import java.io.Closeable
 import java.io.IOException
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import javax.annotation.PostConstruct
 import javax.inject.Singleton
 import javax.naming.Context
 import javax.naming.NamingEnumeration
@@ -24,10 +22,9 @@ class ActiveDirectoryService(
     @Property(name = "app.activedirectory.password") private val password: String,
     @Property(name = "app.activedirectory.server") private val domainController: String,
     @Property(name = "app.activedirectory.searchbase") private val searchBase: String
-) : Closeable {
+) {
     private val logger = KotlinLogging.logger {}
 
-    private lateinit var ldapContext: LdapContext
     private val searchControls: SearchControls
     private val returnAttributes =
         arrayOf(
@@ -50,8 +47,7 @@ class ActiveDirectoryService(
         searchControls.returningAttributes = returnAttributes
     }
 
-    @PostConstruct
-    fun initialize() {
+    fun createLdapContext(): LdapContext {
         val properties: Properties = Properties()
         properties[Context.INITIAL_CONTEXT_FACTORY] = "com.sun.jndi.ldap.LdapCtxFactory"
         properties[Context.PROVIDER_URL] = "LDAP://$domainController"
@@ -59,9 +55,9 @@ class ActiveDirectoryService(
         properties[Context.SECURITY_CREDENTIALS] = password
 
         // initializing Active Directory LDAP connection
-        try {
+        return try {
             logger.debug { "Initializing LDAP connection with properties $properties..." }
-            ldapContext = InitialLdapContext(properties, null)
+            InitialLdapContext(properties, null)
         } catch (e: Exception) {
             logger.error(e) { "Initializing LDAP connection failed." }
             throw ConnectionException(e)
@@ -84,6 +80,8 @@ class ActiveDirectoryService(
                 searchValue,
                 searchBy
             )
+
+            val ldapContext = createLdapContext()
 
             // Activate paged results
             var cookie: ByteArray? = null
@@ -127,6 +125,7 @@ class ActiveDirectoryService(
                 logger.debug { "Fetched a total of ${users.count()} entries." }
             } while (cookie != null)
 
+            closeLdapContext(ldapContext)
         } catch (e: NamingException) {
             logger.error(e) { "PagedSearch failed." }
         } catch (e: IOException) {
@@ -253,7 +252,7 @@ class ActiveDirectoryService(
     /**
      * Closes the LDAP connection with Domain controller
      */
-    override fun close() {
+    fun closeLdapContext(ldapContext: LdapContext) {
         try {
             logger.debug { "Closing LDAP connection..." }
             ldapContext.close()

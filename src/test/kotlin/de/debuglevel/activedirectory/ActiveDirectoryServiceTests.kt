@@ -151,7 +151,7 @@ class ActiveDirectoryServiceTests {
                 "password",
                 "localhost:10389",
                 "dc=root"
-            ).initialize()
+            ).createLdapContext()
         }
     }
 
@@ -161,7 +161,7 @@ class ActiveDirectoryServiceTests {
 
         // Act & Assert
         assertThrows<ActiveDirectoryService.ConnectionException> {
-            getInvalidActiveDirectory().initialize()
+            getInvalidActiveDirectory().createLdapContext()
         }
     }
 
