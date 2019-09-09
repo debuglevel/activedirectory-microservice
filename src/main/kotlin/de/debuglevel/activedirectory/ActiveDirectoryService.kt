@@ -16,7 +16,6 @@ import javax.naming.directory.SearchControls
 import javax.naming.directory.SearchResult
 import javax.naming.ldap.*
 
-
 // see original at https://myjeeva.com/querying-active-directory-using-java.html
 @Singleton
 class ActiveDirectoryService(
@@ -58,6 +57,9 @@ class ActiveDirectoryService(
         properties[Context.SECURITY_PRINCIPAL] = username
         properties[Context.SECURITY_CREDENTIALS] = password
 
+        // TODO: initializing should may be done per request:
+        //  - current implementation will mess up with concurrent requests, as ldapContext.requestControls is modified in search
+        //  - connection might get closed and will not be reestablished again
         // initializing Active Directory LDAP connection
         try {
             logger.debug { "Initializing LDAP connection with properties $properties..." }
