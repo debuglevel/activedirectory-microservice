@@ -1,5 +1,5 @@
 package de.debuglevel.activedirectory.computer
 
-enum class SearchScope {
+enum class ComputerSearchScope {
     Name
 }

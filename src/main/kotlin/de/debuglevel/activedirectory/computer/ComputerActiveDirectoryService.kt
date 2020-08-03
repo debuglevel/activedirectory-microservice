@@ -16,7 +16,7 @@ import javax.naming.ldap.*
 
 // see original at https://myjeeva.com/querying-active-directory-using-java.html
 @Singleton
-class ComputersActiveDirectoryService(
+class ComputerActiveDirectoryService(
     @Property(name = "app.activedirectory.username") private val username: String,
     @Property(name = "app.activedirectory.password") private val password: String,
     @Property(name = "app.activedirectory.server") private val domainController: String,
@@ -71,7 +71,7 @@ class ComputersActiveDirectoryService(
      * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
      * @throws NamingException
      */
-    fun getComputers(searchValue: String, searchBy: SearchScope): List<Computer> {
+    fun getComputers(searchValue: String, searchBy: ComputerSearchScope): List<Computer> {
         val computers = ArrayList<Computer>()
 
         try {
@@ -147,7 +147,7 @@ class ComputersActiveDirectoryService(
         //TODO("Does not work with more then 1000 users due to missing paging")
         logger.debug { "Getting all computers..." }
 
-        val computers = getComputers("*", SearchScope.Name)
+        val computers = getComputers("*", ComputerSearchScope.Name)
 
         logger.debug { "Got ${computers.count()} computers..." }
         return computers
@@ -161,7 +161,7 @@ class ComputersActiveDirectoryService(
      * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
      * @throws NamingException
      */
-    fun getComputer(searchValue: String, searchBy: SearchScope): Computer {
+    fun getComputer(searchValue: String, searchBy: ComputerSearchScope): Computer {
         logger.debug { "Getting computer '$searchValue' by $searchBy..." }
 
         val computers = getComputers(searchValue, searchBy)
@@ -272,11 +272,11 @@ class ComputersActiveDirectoryService(
          * @param searchBy a [java.lang.String] object - scope of search by username or email id
          * @return a [java.lang.String] object - filter string
          */
-        fun getFilter(searchValue: String, searchBy: SearchScope): String {
+        fun getFilter(searchValue: String, searchBy: ComputerSearchScope): String {
             logger.debug { "Building filter for searching by '$searchBy' for '$searchValue'..." }
 
             val filter = when (searchBy) {
-                SearchScope.Name -> "$baseFilter(name=$searchValue))"
+                ComputerSearchScope.Name -> "$baseFilter(name=$searchValue))"
             }
 
             logger.debug { "Built filter for searching by '$searchBy' for '$searchValue': $filter" }

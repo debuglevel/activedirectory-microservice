@@ -13,7 +13,7 @@ import mu.KotlinLogging
  */
 @Secured(SecurityRule.IS_AUTHENTICATED)
 @Controller("/computers")
-class ComputerController(private val activeDirectoryService: ComputersActiveDirectoryService) {
+class ComputerController(private val activeDirectoryService: ComputerActiveDirectoryService) {
     private val logger = KotlinLogging.logger {}
 
     // TODO: this will NOT work as the filter is built wrong (user attribute filter instead of computer attribute filter)
@@ -24,7 +24,7 @@ class ComputerController(private val activeDirectoryService: ComputersActiveDire
         return try {
             val computer = activeDirectoryService.getComputer(
                 name,
-                SearchScope.Name
+                ComputerSearchScope.Name
             )
             HttpResponse.ok(ComputerResponse(computer))
         } catch (e: UserActiveDirectoryService.NoUserFoundException) {

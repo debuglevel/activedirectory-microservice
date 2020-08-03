@@ -1,8 +1,8 @@
 package de.debuglevel.activedirectory
 
-import de.debuglevel.activedirectory.user.SearchScope
 import de.debuglevel.activedirectory.user.User
 import de.debuglevel.activedirectory.user.UserActiveDirectoryService
+import de.debuglevel.activedirectory.user.UserSearchScope
 import org.assertj.core.api.Assertions
 import org.mockito.Mockito
 import java.util.stream.Stream
@@ -28,25 +28,25 @@ object TestDataProvider {
     fun validFilterProvider() = Stream.of(
         FilterTestData(
             value = "my@mail.example",
-            by = SearchScope.Email,
+            by = UserSearchScope.Email,
             expectedFilter = "(&((&(objectCategory=Person)(objectClass=User)))(mail=my@mail.example))"
         ),
         FilterTestData(
             value = "myAccountName",
-            by = SearchScope.Username,
+            by = UserSearchScope.Username,
             expectedFilter = "(&((&(objectCategory=Person)(objectClass=User)))(samaccountname=myAccountName))"
         )
     )
 
     data class FilterTestData(
         val value: String,
-        val by: SearchScope,
+        val by: UserSearchScope,
         val expectedFilter: String? = null
     )
 
     fun validUserSearchProvider() = Stream.of(
         AccountTestData(
-            value = "maxmustermann", searchScope = SearchScope.Username, user = User(
+            value = "maxmustermann", searchScope = UserSearchScope.Username, user = User(
                 "maxmustermann",
                 "Max",
                 "max@mustermann.de",
@@ -54,7 +54,7 @@ object TestDataProvider {
             )
         ),
         AccountTestData(
-            value = "max@mustermann.de", searchScope = SearchScope.Email, user = User(
+            value = "max@mustermann.de", searchScope = UserSearchScope.Email, user = User(
                 "maxmustermann",
                 "Max",
                 "max@mustermann.de",
@@ -62,7 +62,7 @@ object TestDataProvider {
             )
         ),
         AccountTestData(
-            value = "alexaloah", searchScope = SearchScope.Username, user = User(
+            value = "alexaloah", searchScope = UserSearchScope.Username, user = User(
                 "alexaloah",
                 "Alex",
                 "alex@aloah.de",
@@ -70,7 +70,7 @@ object TestDataProvider {
             )
         ),
         AccountTestData(
-            value = "alex@aloah.de", searchScope = SearchScope.Email, user = User(
+            value = "alex@aloah.de", searchScope = UserSearchScope.Email, user = User(
                 "alexaloah",
                 "Alex",
                 "alex@aloah.de",
@@ -82,16 +82,16 @@ object TestDataProvider {
     fun invalidUserSearchProvider() = Stream.of(
         AccountTestData(
             value = "heinzstrunk",
-            searchScope = SearchScope.Username
+            searchScope = UserSearchScope.Username
         ),
         AccountTestData(
             value = "heinz@strunk.de",
-            searchScope = SearchScope.Email
+            searchScope = UserSearchScope.Email
         ),
 
         // search by wrong value/scope combination
         AccountTestData(
-            value = "maxmustermann", searchScope = SearchScope.Email, user = User(
+            value = "maxmustermann", searchScope = UserSearchScope.Email, user = User(
                 "maxmustermann",
                 "Max",
                 "max@mustermann.de",
@@ -99,7 +99,7 @@ object TestDataProvider {
             )
         ),
         AccountTestData(
-            value = "max@mustermann.de", searchScope = SearchScope.Username, user = User(
+            value = "max@mustermann.de", searchScope = UserSearchScope.Username, user = User(
                 "maxmustermann",
                 "Max",
                 "max@mustermann.de",
@@ -110,7 +110,7 @@ object TestDataProvider {
 
     data class AccountTestData(
         val value: String,
-        val searchScope: SearchScope,
+        val searchScope: UserSearchScope,
         val user: User? = null
     )
 
@@ -118,11 +118,11 @@ object TestDataProvider {
         // getUser(searchValue, searchBy)
         run {
             for (accountTestData in validUserSearchProvider()) {
-                Mockito.`when`(activeDirectoryServiceMock.getUser(accountTestData.value, SearchScope.Username))
+                Mockito.`when`(activeDirectoryServiceMock.getUser(accountTestData.value, UserSearchScope.Username))
                     .then { invocation -> accountTestData.user }
 
                 // check that mock works
-                val resultData = activeDirectoryServiceMock.getUser(accountTestData.value, SearchScope.Username)
+                val resultData = activeDirectoryServiceMock.getUser(accountTestData.value, UserSearchScope.Username)
                 Assertions.assertThat(resultData).isEqualTo(accountTestData.user)
                 //verify(dataService)?.fetchData(ISBN(bookData.isbn))
             }

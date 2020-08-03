@@ -20,7 +20,7 @@ class UserController(private val activeDirectoryService: UserActiveDirectoryServ
         logger.debug("Called getOne($username)")
 
         return try {
-            val user = activeDirectoryService.getUser(username, SearchScope.Username)
+            val user = activeDirectoryService.getUser(username, UserSearchScope.Username)
             HttpResponse.ok(UserResponse(user))
         } catch (e: UserActiveDirectoryService.NoUserFoundException) {
             HttpResponse.notFound(UserResponse(error = "User '$username' not found"))

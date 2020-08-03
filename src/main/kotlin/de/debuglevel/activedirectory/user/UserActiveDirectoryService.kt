@@ -71,7 +71,7 @@ class UserActiveDirectoryService(
      * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
      * @throws NamingException
      */
-    fun getUsers(searchValue: String, searchBy: SearchScope): List<User> {
+    fun getUsers(searchValue: String, searchBy: UserSearchScope): List<User> {
         val users = ArrayList<User>()
 
         try {
@@ -147,7 +147,7 @@ class UserActiveDirectoryService(
         //TODO("Does not work with more then 1000 users due to missing paging")
         logger.debug { "Getting all users..." }
 
-        val users = getUsers("*", SearchScope.Username)
+        val users = getUsers("*", UserSearchScope.Username)
 
         logger.debug { "Got ${users.count()} users..." }
         return users
@@ -161,7 +161,7 @@ class UserActiveDirectoryService(
      * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
      * @throws NamingException
      */
-    fun getUser(searchValue: String, searchBy: SearchScope): User {
+    fun getUser(searchValue: String, searchBy: UserSearchScope): User {
         logger.debug { "Getting user '$searchValue' by $searchBy..." }
 
         val users = getUsers(searchValue, searchBy)
@@ -275,12 +275,12 @@ class UserActiveDirectoryService(
          * @param searchBy a [java.lang.String] object - scope of search by username or email id
          * @return a [java.lang.String] object - filter string
          */
-        fun getFilter(searchValue: String, searchBy: SearchScope): String {
+        fun getFilter(searchValue: String, searchBy: UserSearchScope): String {
             logger.debug { "Building filter for searching by '$searchBy' for '$searchValue'..." }
 
             val filter = when (searchBy) {
-                SearchScope.Email -> "$baseFilter(mail=$searchValue))"
-                SearchScope.Username -> "$baseFilter(samaccountname=$searchValue))"
+                UserSearchScope.Email -> "$baseFilter(mail=$searchValue))"
+                UserSearchScope.Username -> "$baseFilter(samaccountname=$searchValue))"
             }
 
             logger.debug { "Built filter for searching by '$searchBy' for '$searchValue': $filter" }
