@@ -1,6 +1,5 @@
 package de.debuglevel.activedirectory
 
-import de.debuglevel.activedirectory.computer.ComputerSearchScope
 import mu.KotlinLogging
 import javax.naming.NamingException
 import javax.naming.directory.SearchControls
@@ -58,15 +57,45 @@ abstract class ActiveDirectoryService<T>(
      * @param searchBy a [java.lang.String] object - scope of search by username or email id
      * @return a [java.lang.String] object - filter string
      */
-    abstract fun buildFilter(searchValue: String, searchBy: ComputerSearchScope): String
+    abstract fun buildFilter(searchValue: String, searchBy: ActiveDirectorySearchScope): String
 
     /**
      * Builds an entity object from the LDAP search result.
      */
     protected abstract fun build(it: SearchResult): ActiveDirectoryEntity
 
+    /**
+     * Gets users from the Active Directory by username/email id for given search base
+     *
+     * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email
+     * @param searchBy a [java.lang.String] object - scope of search by username or by email id
+     * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
+     * @throws NamingException
+     */
+    abstract fun getAll(searchValue: String, searchBy: ActiveDirectorySearchScope): List<ActiveDirectoryEntity>
+
+    /**
+     * Gets all computers from the Active Directory for given search base
+     *
+     * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
+     * @throws NamingException
+     */
+    abstract fun getAll(): List<ActiveDirectoryEntity>
+
+    /**
+     * Gets an user from the Active Directory by username/email id for given search base
+     *
+     * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email
+     * @param searchBy a [java.lang.String] object - scope of search by username or by email id
+     * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
+     * @throws NamingException
+     */
+    abstract fun get(searchValue: String, searchBy: ActiveDirectorySearchScope): ActiveDirectoryEntity
+
     class MoreThanOneResultException(items: List<ActiveDirectoryEntity>) :
         Exception("Found more than one result: $items")
 
     class NoItemFoundException : Exception("No such item found")
+
+    class InvalidSearchScope(correct: String) : Exception("Invalid SearchScope, use $correct instead.")
 }

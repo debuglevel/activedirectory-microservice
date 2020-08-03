@@ -1,5 +1,6 @@
 package de.debuglevel.activedirectory.computer
 
+import de.debuglevel.activedirectory.ActiveDirectorySearchScope
 import de.debuglevel.activedirectory.ActiveDirectoryService
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.convertLdapTimestampToDate
 import io.micronaut.context.annotation.Property
@@ -39,15 +40,7 @@ class ComputerActiveDirectoryService(
             "operatingSystemVersion"
         )
 
-    /**
-     * Gets users from the Active Directory by username/email id for given search base
-     *
-     * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email
-     * @param searchBy a [java.lang.String] object - scope of search by username or by email id
-     * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
-     * @throws NamingException
-     */
-    fun getAll(searchValue: String, searchBy: ComputerSearchScope): List<Computer> {
+    override fun getAll(searchValue: String, searchBy: ActiveDirectorySearchScope): List<Computer> {
         val computers = ArrayList<Computer>()
 
         try {
@@ -108,14 +101,7 @@ class ComputerActiveDirectoryService(
         return computers
     }
 
-    /**
-     * Gets all computers from the Active Directory for given search base
-     *
-     * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
-     * @throws NamingException
-     */
-    fun getAll(): List<Computer> {
-        //TODO("Does not work with more then 1000 users due to missing paging")
+    override fun getAll(): List<Computer> {
         logger.debug { "Getting all computers..." }
 
         val computers = getAll("*", ComputerSearchScope.Name)
@@ -124,15 +110,7 @@ class ComputerActiveDirectoryService(
         return computers
     }
 
-    /**
-     * Gets an user from the Active Directory by username/email id for given search base
-     *
-     * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email
-     * @param searchBy a [java.lang.String] object - scope of search by username or by email id
-     * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
-     * @throws NamingException
-     */
-    fun get(searchValue: String, searchBy: ComputerSearchScope): Computer {
+    override fun get(searchValue: String, searchBy: ActiveDirectorySearchScope): Computer {
         logger.debug { "Getting computer '$searchValue' by $searchBy..." }
 
         val computers = getAll(searchValue, searchBy)
@@ -148,18 +126,6 @@ class ComputerActiveDirectoryService(
         logger.debug { "Got computer '$searchValue' by $searchBy: $computer" }
         return computer
     }
-
-//    private fun build(results: NamingEnumeration<SearchResult>): List<Computer> {
-//        logger.debug { "Building computer from search results..." }
-//
-//        val computers = results.asSequence()
-//            .map { build(it) }
-//            .onEach { logger.debug { "Got computer $it" } }
-//            .toList()
-//
-//        logger.debug { "Built ${computers.count()} computers." }
-//        return computers
-//    }
 
     override fun build(it: SearchResult): Computer {
         val commonName = it.attributes.get("cn")?.toString()?.substringAfter(": ")
@@ -196,11 +162,12 @@ class ComputerActiveDirectoryService(
         )
     }
 
-    override fun buildFilter(searchValue: String, searchBy: ComputerSearchScope): String {
+    override fun buildFilter(searchValue: String, searchBy: ActiveDirectorySearchScope): String {
         logger.debug { "Building filter for searching by '$searchBy' for '$searchValue'..." }
 
         val filter = when (searchBy) {
             ComputerSearchScope.Name -> "(&($baseFilter)(name=$searchValue))"
+            else -> throw InvalidSearchScope("ComputerSearchScope")
         }
 
         logger.debug { "Built filter for searching by '$searchBy' for '$searchValue': $filter" }
