@@ -30,6 +30,11 @@ abstract class ActiveDirectoryService<T : ActiveDirectoryEntity>(
      */
     protected abstract val baseFilter: String
 
+    /**
+     * Name of the entity
+     */
+    protected abstract val entityName: String
+
     protected val searchControls: SearchControls = SearchControls()
 
     init {
@@ -137,15 +142,22 @@ abstract class ActiveDirectoryService<T : ActiveDirectoryEntity>(
      */
     abstract fun getAll(): List<T>
 
-    /**
-     * Gets an user from the Active Directory by username/email id for given search base
-     *
-     * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email
-     * @param searchBy a [java.lang.String] object - scope of search by username or by email id
-     * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
-     * @throws NamingException
-     */
-    abstract fun get(searchValue: String, searchBy: ActiveDirectorySearchScope): T
+    fun get(searchValue: String, searchBy: ActiveDirectorySearchScope): T {
+        logger.debug { "Getting $entityName '$searchValue' by $searchBy..." }
+
+        val items = getAll(searchValue, searchBy)
+
+        if (items.count() > 1) {
+            throw MoreThanOneResultException(items)
+        } else if (items.isEmpty()) {
+            throw NoItemFoundException()
+        }
+
+        val item = items.first()
+
+        logger.debug { "Got $entityName '$searchValue' by $searchBy: $item" }
+        return item
+    }
 
     class MoreThanOneResultException(items: List<ActiveDirectoryEntity>) :
         Exception("Found more than one result: $items")

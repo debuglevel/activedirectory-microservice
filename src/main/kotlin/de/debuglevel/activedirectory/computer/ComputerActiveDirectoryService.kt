@@ -43,23 +43,6 @@ class ComputerActiveDirectoryService(
         return computers
     }
 
-    override fun get(searchValue: String, searchBy: ActiveDirectorySearchScope): Computer {
-        logger.debug { "Getting computer '$searchValue' by $searchBy..." }
-
-        val computers = getAll(searchValue, searchBy)
-
-        if (computers.count() > 1) {
-            throw MoreThanOneResultException(computers)
-        } else if (computers.isEmpty()) {
-            throw NoItemFoundException()
-        }
-
-        val computer = computers.first()
-
-        logger.debug { "Got computer '$searchValue' by $searchBy: $computer" }
-        return computer
-    }
-
     override fun build(it: SearchResult): Computer {
         val commonName = it.attributes.get("cn")?.toString()?.substringAfter(": ")
         val operatingSystem = it.attributes.get("operatingSystem")?.toString()?.substringAfter(": ")
@@ -108,4 +91,6 @@ class ComputerActiveDirectoryService(
     }
 
     override val baseFilter = "(&(objectCategory=Computer)(objectClass=Computer))"
+
+    override val entityName = "computer"
 }
