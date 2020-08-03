@@ -1,7 +1,6 @@
-package de.debuglevel.activedirectory
+package de.debuglevel.activedirectory.computer
 
-import de.debuglevel.activedirectory.user.UserActiveDirectoryService
-import de.debuglevel.activedirectory.user.UserResponse
+import de.debuglevel.activedirectory.TestDataProvider
 import io.micronaut.core.type.Argument
 import io.micronaut.http.HttpRequest
 import io.micronaut.http.client.HttpClient
@@ -24,47 +23,47 @@ import javax.inject.Inject
 
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UserControllerTests {
+class ComputerControllerTests {
     private val logger = KotlinLogging.logger {}
 
     @Inject
     lateinit var server: EmbeddedServer
 
     @Inject
-    @field:Client("/users")
+    @field:Client("/computers")
     lateinit var httpClient: HttpClient
 
     @Inject
-    var activeDirectoryServiceMock: UserActiveDirectoryService? = null
+    var activeDirectoryServiceMock: ComputerActiveDirectoryService? = null
 
-    @MockBean(UserActiveDirectoryService::class)
-    fun activeDirectoryServiceMock(): UserActiveDirectoryService {
-        return mock(UserActiveDirectoryService::class.java)
+    @MockBean(ComputerActiveDirectoryService::class)
+    fun activeDirectoryServiceMock(): ComputerActiveDirectoryService {
+        return mock(ComputerActiveDirectoryService::class.java)
     }
 
     @BeforeEach
     fun `set up mock`() {
-        TestDataProvider.`set up activeDirectoryService mock`(this.activeDirectoryServiceMock!!)
+        TestDataProvider.`set up computerActiveDirectoryService mock`(this.activeDirectoryServiceMock!!)
     }
 
     @ParameterizedTest
-    @MethodSource("validUserSearchProvider")
-    fun `retrieve person`(accountTestData: TestDataProvider.AccountTestData) {
+    @MethodSource("validComputerSearchProvider")
+    fun `retrieve person`(computerTestData: TestDataProvider.ComputerTestData) {
         // Arrange
-        val userResponse = UserResponse(accountTestData.user!!)
+        val computerResponse = ComputerResponse(computerTestData.computer!!)
 
         // Act
-        val retrieveUri = UriBuilder.of("/{username}")
-            .expand(mutableMapOf("username" to accountTestData.value))
+        val retrieveUri = UriBuilder.of("/{computername}")
+            .expand(mutableMapOf("computername" to computerTestData.value))
             .toString()
         val httpRequest = HttpRequest
             .GET<String>(retrieveUri)
             .basicAuth("SECRET_USERNAME", "SECRET_PASSWORD")
         val retrievedPerson = httpClient.toBlocking()
-            .retrieve(httpRequest, UserResponse::class.java)
+            .retrieve(httpRequest, ComputerResponse::class.java)
 
         // Assert
-        Assertions.assertThat(retrievedPerson).isEqualTo(userResponse)
+        Assertions.assertThat(retrievedPerson).isEqualTo(computerResponse)
     }
 
     @Test
@@ -76,16 +75,16 @@ class UserControllerTests {
         val httpRequest = HttpRequest
             .GET<String>(retrieveUri)
             .basicAuth("SECRET_USERNAME", "SECRET_PASSWORD")
-        val argument = Argument.of(List::class.java, UserResponse::class.java)
+        val argument = Argument.of(List::class.java, ComputerResponse::class.java)
         val retrievedPersons = httpClient.toBlocking()
-            .retrieve(httpRequest, argument) as List<UserResponse>
+            .retrieve(httpRequest, argument) as List<ComputerResponse>
 
         // Assert
-        validUserSearchProvider().forEach { testData ->
-            val userResponse = UserResponse(testData.user!!)
+        validComputerSearchProvider().forEach { testData ->
+            val computerResponse = ComputerResponse(testData.computer!!)
 
             Assertions.assertThat(retrievedPersons)
-                .anyMatch { retrieved -> retrieved == userResponse }
+                .anyMatch { retrieved -> retrieved == computerResponse }
         }
     }
 
@@ -107,5 +106,6 @@ class UserControllerTests {
             .hasMessageContaining("Unauthorized")
     }
 
-    fun validUserSearchProvider() = TestDataProvider.validUserSearchProvider()
+    fun validComputerSearchProvider() =
+        TestDataProvider.validComputerSearchProvider()
 }

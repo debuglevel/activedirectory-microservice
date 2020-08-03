@@ -1,8 +1,7 @@
-package de.debuglevel.activedirectory
+package de.debuglevel.activedirectory.user
 
-import de.debuglevel.activedirectory.TestDataProvider.`set up activeDirectoryService mock`
-import de.debuglevel.activedirectory.user.UserActiveDirectoryService
-import de.debuglevel.activedirectory.user.UserResponse
+import de.debuglevel.activedirectory.TestDataProvider
+import de.debuglevel.activedirectory.TestDataProvider.`set up userActiveDirectoryService mock`
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.annotation.MicronautTest
 import io.micronaut.test.annotation.MockBean
@@ -49,7 +48,7 @@ class UserClientTests {
 
     @BeforeEach
     fun `set up mock`() {
-        `set up activeDirectoryService mock`(this.activeDirectoryServiceMock!!)
+        `set up userActiveDirectoryService mock`(this.activeDirectoryServiceMock!!)
     }
 
     @ParameterizedTest
@@ -112,5 +111,6 @@ class UserClientTests {
             .hasMessageContaining("Unauthorized")
     }
 
-    fun validUserSearchProvider() = TestDataProvider.validUserSearchProvider()
+    fun validUserSearchProvider() =
+        TestDataProvider.validUserSearchProvider()
 }

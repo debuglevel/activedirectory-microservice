@@ -1,12 +1,11 @@
-package de.debuglevel.activedirectory
+package de.debuglevel.activedirectory.user
 
-import de.debuglevel.activedirectory.user.User
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UserTest {
+class UserTests {
 
     @Test
     fun `is disabled on appropriate userAccountControl attribute`() {
