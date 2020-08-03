@@ -7,6 +7,7 @@ import io.micronaut.test.annotation.MicronautTest
 import io.micronaut.test.annotation.MockBean
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -54,6 +55,9 @@ class UserClientTests {
     @ParameterizedTest
     @MethodSource("validUserSearchProvider")
     fun `retrieve user`(userTestData: TestDataProvider.UserTestData) {
+        // Skip on test data with email search value, because the Controller only searches for username
+        Assumptions.assumeTrue(userTestData.searchScope != UserSearchScope.Email)
+
         // Arrange
         val userResponse = UserResponse(userTestData.user!!)
 
