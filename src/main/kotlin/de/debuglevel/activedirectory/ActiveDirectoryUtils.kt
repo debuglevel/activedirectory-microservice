@@ -5,6 +5,7 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 import javax.naming.Context
+import javax.naming.directory.SearchResult
 import javax.naming.ldap.InitialLdapContext
 import javax.naming.ldap.LdapContext
 
@@ -68,6 +69,9 @@ object ActiveDirectoryUtils {
             throw ConnectionException(e)
         }
     }
+
+    fun SearchResult.getAttributeValue(attributeName: String) =
+        attributes.get(attributeName)?.toString()?.substringAfter(": ")
 
     class ConnectionException(e: Exception) : Exception("Could not connect to LDAP server", e)
 }

@@ -1,5 +1,6 @@
 package de.debuglevel.activedirectory.user
 
+import de.debuglevel.activedirectory.ActiveDirectoryEntity
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -13,7 +14,7 @@ data class User(
     val userAccountControl: Int? = null,
     val lastLogon: GregorianCalendar? = null,
     val whenCreated: GregorianCalendar? = null
-) {
+) : ActiveDirectoryEntity {
     /**
      * Account is disabled if bitwise 2 is set
      */

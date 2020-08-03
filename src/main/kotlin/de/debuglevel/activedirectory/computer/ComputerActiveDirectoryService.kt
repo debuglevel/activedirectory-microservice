@@ -3,6 +3,7 @@ package de.debuglevel.activedirectory.computer
 import de.debuglevel.activedirectory.ActiveDirectorySearchScope
 import de.debuglevel.activedirectory.ActiveDirectoryService
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.convertLdapTimestampToDate
+import de.debuglevel.activedirectory.ActiveDirectoryUtils.getAttributeValue
 import io.micronaut.context.annotation.Property
 import mu.KotlinLogging
 import javax.inject.Singleton
@@ -44,14 +45,13 @@ class ComputerActiveDirectoryService(
     }
 
     override fun build(it: SearchResult): Computer {
-        val commonName = it.attributes.get("cn")?.toString()?.substringAfter(": ")
-        val operatingSystem = it.attributes.get("operatingSystem")?.toString()?.substringAfter(": ")
-        val operatingSystemVersion = it.attributes.get("operatingSystemVersion")?.toString()?.substringAfter(": ")
-        val logonCount = it.attributes.get("logonCount")?.toString()?.substringAfter(": ")?.toInt()
-        val userAccountControl =
-            it.attributes.get("userAccountControl")?.toString()?.substringAfter(": ")?.toIntOrNull()
+        val commonName = it.getAttributeValue("cn")
+        val operatingSystem = it.getAttributeValue("operatingSystem")
+        val operatingSystemVersion = it.getAttributeValue("operatingSystemVersion")
+        val logonCount = it.getAttributeValue("logonCount")?.toInt()
+        val userAccountControl = it.getAttributeValue("userAccountControl")?.toIntOrNull()
         val lastLogon = {
-            val lastLogonTimestamp = it.attributes.get("lastLogon")?.toString()?.substringAfter(": ")?.toLong()
+            val lastLogonTimestamp = it.getAttributeValue("lastLogon")?.toLong()
             if (lastLogonTimestamp != null && lastLogonTimestamp != 0L) {
                 convertLdapTimestampToDate(lastLogonTimestamp)
             } else {
@@ -59,7 +59,7 @@ class ComputerActiveDirectoryService(
             }
         }()
         val whenCreated = {
-            val whenCreatedTimestamp = it.attributes.get("whenCreated")?.toString()?.substringAfter(": ")
+            val whenCreatedTimestamp = it.getAttributeValue("whenCreated")
             if (whenCreatedTimestamp != null) {
                 convertLdapTimestampToDate(whenCreatedTimestamp)
             } else {

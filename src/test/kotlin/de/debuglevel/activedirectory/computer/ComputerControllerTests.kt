@@ -38,23 +38,25 @@ class ComputerControllerTests {
 
     @MockBean(ComputerActiveDirectoryService::class)
     fun activeDirectoryServiceMock(): ComputerActiveDirectoryService {
+        logger.debug { "Creating mock..." }
         return mock(ComputerActiveDirectoryService::class.java)
     }
 
     @BeforeEach
     fun `set up mock`() {
+        logger.debug { "Setting up mock..." }
         TestDataProvider.`set up computerActiveDirectoryService mock`(this.activeDirectoryServiceMock!!)
     }
 
     @ParameterizedTest
     @MethodSource("validComputerSearchProvider")
-    fun `retrieve person`(computerTestData: TestDataProvider.ComputerTestData) {
+    fun `retrieve computer`(computerTestData: TestDataProvider.ComputerTestData) {
         // Arrange
         val computerResponse = ComputerResponse(computerTestData.computer!!)
 
         // Act
-        val retrieveUri = UriBuilder.of("/{computername}")
-            .expand(mutableMapOf("computername" to computerTestData.value))
+        val retrieveUri = UriBuilder.of("/{name}")
+            .expand(mutableMapOf("name" to computerTestData.value))
             .toString()
         val httpRequest = HttpRequest
             .GET<String>(retrieveUri)

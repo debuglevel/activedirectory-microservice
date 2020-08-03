@@ -1,5 +1,7 @@
 package de.debuglevel.activedirectory.user
 
+import de.debuglevel.activedirectory.ActiveDirectoryService
+import de.debuglevel.activedirectory.ActiveDirectoryUtils
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
@@ -20,13 +22,13 @@ class UserController(private val activeDirectoryService: UserActiveDirectoryServ
         logger.debug("Called getOne($username)")
 
         return try {
-            val user = activeDirectoryService.getUser(username, UserSearchScope.Username)
+            val user = activeDirectoryService.get(username, UserSearchScope.Username)
             HttpResponse.ok(UserResponse(user))
-        } catch (e: UserActiveDirectoryService.NoUserFoundException) {
+        } catch (e: ActiveDirectoryService.NoItemFoundException) {
             HttpResponse.notFound(UserResponse(error = "User '$username' not found"))
-        } catch (e: UserActiveDirectoryService.MoreThanOneResultException) {
+        } catch (e: ActiveDirectoryService.MoreThanOneResultException) {
             HttpResponse.serverError(UserResponse(error = "Username '$username' is ambiguous"))
-        } catch (e: UserActiveDirectoryService.ConnectionException) {
+        } catch (e: ActiveDirectoryUtils.ConnectionException) {
             HttpResponse.serverError(UserResponse(error = "Could not connect to Active Directory"))
         }
     }
@@ -36,13 +38,13 @@ class UserController(private val activeDirectoryService: UserActiveDirectoryServ
         logger.debug("Called getList()")
 
         return try {
-            val users = activeDirectoryService.getUsers()
+            val users = activeDirectoryService.getAll()
                 .map {
                     UserResponse(it)
                 }.toSet()
 
             HttpResponse.ok(users)
-        } catch (e: UserActiveDirectoryService.ConnectionException) {
+        } catch (e: ActiveDirectoryUtils.ConnectionException) {
             val response = setOf(UserResponse(error = "Could not connect to Active Directory"))
             HttpResponse.serverError(response)
         }

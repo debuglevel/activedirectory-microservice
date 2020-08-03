@@ -171,11 +171,11 @@ object TestDataProvider {
         // getUser(searchValue, searchBy)
         run {
             for (accountTestData in validUserSearchProvider()) {
-                Mockito.`when`(activeDirectoryServiceMock.getUser(accountTestData.value, UserSearchScope.Username))
+                Mockito.`when`(activeDirectoryServiceMock.get(accountTestData.value, UserSearchScope.Username))
                     .then { invocation -> accountTestData.user }
 
                 // check that mock works
-                val resultData = activeDirectoryServiceMock.getUser(accountTestData.value, UserSearchScope.Username)
+                val resultData = activeDirectoryServiceMock.get(accountTestData.value, UserSearchScope.Username)
                 Assertions.assertThat(resultData).isEqualTo(accountTestData.user)
                 //verify(dataService)?.fetchData(ISBN(bookData.isbn))
             }
@@ -185,11 +185,11 @@ object TestDataProvider {
         run {
             val users = validUserSearchProvider().map { it.user }.toList()
 
-            Mockito.`when`(activeDirectoryServiceMock.getUsers())
+            Mockito.`when`(activeDirectoryServiceMock.getAll())
                 .then { invocation -> users }
 
             // check that mock works
-            val resultData = activeDirectoryServiceMock.getUsers()
+            val resultData = activeDirectoryServiceMock.getAll()
             Assertions.assertThat(resultData).contains(*users.toTypedArray())
         }
     }

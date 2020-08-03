@@ -1,6 +1,7 @@
 package de.debuglevel.activedirectory.computer
 
-import de.debuglevel.activedirectory.user.UserActiveDirectoryService
+import de.debuglevel.activedirectory.ActiveDirectoryService
+import de.debuglevel.activedirectory.ActiveDirectoryUtils
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
@@ -16,7 +17,6 @@ import mu.KotlinLogging
 class ComputerController(private val activeDirectoryService: ComputerActiveDirectoryService) {
     private val logger = KotlinLogging.logger {}
 
-    // TODO: this will NOT work as the filter is built wrong (user attribute filter instead of computer attribute filter)
     @Get("/{name}")
     fun getOne(name: String): HttpResponse<ComputerResponse> {
         logger.debug("Called getOne($name)")
@@ -27,11 +27,11 @@ class ComputerController(private val activeDirectoryService: ComputerActiveDirec
                 ComputerSearchScope.Name
             )
             HttpResponse.ok(ComputerResponse(computer))
-        } catch (e: UserActiveDirectoryService.NoUserFoundException) {
+        } catch (e: ActiveDirectoryService.NoItemFoundException) {
             HttpResponse.notFound(ComputerResponse(error = "Computer '$name' not found"))
-        } catch (e: UserActiveDirectoryService.MoreThanOneResultException) {
+        } catch (e: ActiveDirectoryService.MoreThanOneResultException) {
             HttpResponse.serverError(ComputerResponse(error = "Computer name '$name' is ambiguous"))
-        } catch (e: UserActiveDirectoryService.ConnectionException) {
+        } catch (e: ActiveDirectoryUtils.ConnectionException) {
             HttpResponse.serverError(ComputerResponse(error = "Could not connect to Active Directory"))
         }
     }
@@ -47,7 +47,7 @@ class ComputerController(private val activeDirectoryService: ComputerActiveDirec
                 }.toSet()
 
             HttpResponse.ok(users)
-        } catch (e: UserActiveDirectoryService.ConnectionException) {
+        } catch (e: ActiveDirectoryUtils.ConnectionException) {
             val response = setOf(ComputerResponse(error = "Could not connect to Active Directory"))
             HttpResponse.serverError(response)
         }

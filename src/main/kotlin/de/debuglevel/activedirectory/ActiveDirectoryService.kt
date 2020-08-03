@@ -74,7 +74,9 @@ abstract class ActiveDirectoryService<T : ActiveDirectoryEntity>(
     protected abstract fun build(it: SearchResult): T
 
     fun getAll(searchValue: String, searchBy: ActiveDirectorySearchScope): List<T> {
-        val items = ArrayList<T>()
+        logger.debug { "Getting all ${entityName}s searching by '$searchBy' with value='$searchValue'..." }
+
+        val items = mutableListOf<T>()
 
         try {
             val filter = buildFilter(searchValue, searchBy)
@@ -131,6 +133,7 @@ abstract class ActiveDirectoryService<T : ActiveDirectoryEntity>(
             logger.error(e) { "PagedSearch failed." }
         }
 
+        logger.debug { "Got ${items.count()} ${entityName}s searched by '$searchBy' with value='$searchValue'" }
         return items
     }
 
