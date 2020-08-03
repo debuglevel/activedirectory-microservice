@@ -1,4 +1,4 @@
-package de.debuglevel.activedirectory
+package de.debuglevel.activedirectory.computer
 
 import io.micronaut.context.annotation.Property
 import mu.KotlinLogging
@@ -57,7 +57,9 @@ class ComputersActiveDirectoryService(
             InitialLdapContext(properties, null)
         } catch (e: Exception) {
             logger.error(e) { "Initializing LDAP connection failed." }
-            throw ConnectionException(e)
+            throw ConnectionException(
+                e
+            )
         }
     }
 
@@ -69,14 +71,15 @@ class ComputersActiveDirectoryService(
      * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
      * @throws NamingException
      */
-    fun getComputers(searchValue: String, searchBy: ComputerSearchScope): List<Computer> {
+    fun getComputers(searchValue: String, searchBy: SearchScope): List<Computer> {
         val computers = ArrayList<Computer>()
 
         try {
-            val filter = getFilter(
-                searchValue,
-                searchBy
-            )
+            val filter =
+                getFilter(
+                    searchValue,
+                    searchBy
+                )
 
             val ldapContext = createLdapContext()
 
@@ -144,7 +147,7 @@ class ComputersActiveDirectoryService(
         //TODO("Does not work with more then 1000 users due to missing paging")
         logger.debug { "Getting all computers..." }
 
-        val computers = getComputers("*", ComputerSearchScope.Name)
+        val computers = getComputers("*", SearchScope.Name)
 
         logger.debug { "Got ${computers.count()} computers..." }
         return computers
@@ -158,13 +161,15 @@ class ComputersActiveDirectoryService(
      * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
      * @throws NamingException
      */
-    fun getComputer(searchValue: String, searchBy: ComputerSearchScope): Computer {
+    fun getComputer(searchValue: String, searchBy: SearchScope): Computer {
         logger.debug { "Getting computer '$searchValue' by $searchBy..." }
 
         val computers = getComputers(searchValue, searchBy)
 
         if (computers.count() > 1) {
-            throw MoreThanOneResultException(computers)
+            throw MoreThanOneResultException(
+                computers
+            )
         } else if (computers.isEmpty()) {
             throw NoUserFoundException()
         }
@@ -267,11 +272,11 @@ class ComputersActiveDirectoryService(
          * @param searchBy a [java.lang.String] object - scope of search by username or email id
          * @return a [java.lang.String] object - filter string
          */
-        fun getFilter(searchValue: String, searchBy: ComputerSearchScope): String {
+        fun getFilter(searchValue: String, searchBy: SearchScope): String {
             logger.debug { "Building filter for searching by '$searchBy' for '$searchValue'..." }
 
             val filter = when (searchBy) {
-                ComputerSearchScope.Name -> "$baseFilter(name=$searchValue))"
+                SearchScope.Name -> "$baseFilter(name=$searchValue))"
             }
 
             logger.debug { "Built filter for searching by '$searchBy' for '$searchValue': $filter" }

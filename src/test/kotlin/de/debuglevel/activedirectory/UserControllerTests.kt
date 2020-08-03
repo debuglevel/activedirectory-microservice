@@ -1,6 +1,7 @@
 package de.debuglevel.activedirectory
 
-import com.github.trevershick.test.ldap.LdapServerResource
+import de.debuglevel.activedirectory.user.UserActiveDirectoryService
+import de.debuglevel.activedirectory.user.UserResponse
 import io.micronaut.core.type.Argument
 import io.micronaut.http.HttpRequest
 import io.micronaut.http.client.HttpClient
@@ -13,15 +14,13 @@ import io.micronaut.test.annotation.MockBean
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.catchThrowable
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import javax.inject.Inject
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
+import javax.inject.Inject
 
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -36,11 +35,11 @@ class UserControllerTests {
     lateinit var httpClient: HttpClient
 
     @Inject
-    var activeDirectoryServiceMock: ActiveDirectoryService? = null
+    var activeDirectoryServiceMock: UserActiveDirectoryService? = null
 
-    @MockBean(ActiveDirectoryService::class)
-    fun activeDirectoryServiceMock(): ActiveDirectoryService {
-        return mock(ActiveDirectoryService::class.java)
+    @MockBean(UserActiveDirectoryService::class)
+    fun activeDirectoryServiceMock(): UserActiveDirectoryService {
+        return mock(UserActiveDirectoryService::class.java)
     }
 
     @BeforeEach

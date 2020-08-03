@@ -1,12 +1,16 @@
 package de.debuglevel.activedirectory
 
 import de.debuglevel.activedirectory.TestDataProvider.`set up activeDirectoryService mock`
+import de.debuglevel.activedirectory.user.UserActiveDirectoryService
+import de.debuglevel.activedirectory.user.UserResponse
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.annotation.MicronautTest
 import io.micronaut.test.annotation.MockBean
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
@@ -36,11 +40,11 @@ class UserClientTests {
         }
 
     @Inject
-    var activeDirectoryServiceMock: ActiveDirectoryService? = null
+    var activeDirectoryServiceMock: UserActiveDirectoryService? = null
 
-    @MockBean(ActiveDirectoryService::class)
-    fun activeDirectoryServiceMock(): ActiveDirectoryService {
-        return mock(ActiveDirectoryService::class.java)
+    @MockBean(UserActiveDirectoryService::class)
+    fun activeDirectoryServiceMock(): UserActiveDirectoryService {
+        return mock(UserActiveDirectoryService::class.java)
     }
 
     @BeforeEach

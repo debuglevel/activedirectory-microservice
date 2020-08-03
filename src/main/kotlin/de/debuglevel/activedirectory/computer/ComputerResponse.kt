@@ -1,4 +1,4 @@
-package de.debuglevel.activedirectory
+package de.debuglevel.activedirectory.computer
 
 data class ComputerResponse(
     val cn: String? = null,

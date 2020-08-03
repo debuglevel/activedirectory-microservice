@@ -1,14 +1,16 @@
-package de.debuglevel.activedirectory
+package de.debuglevel.activedirectory.user
 
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-data class Computer(
+data class User(
+    val username: String,
+    val givenname: String? = null,
+    val mail: String? = null,
     val cn: String? = null,
+    val sn: String? = null,
+    val displayName: String? = null,
     val userAccountControl: Int? = null,
-    val logonCount: Int? = null,
-    val operatingSystem: String? = null,
-    val operatingSystemVersion: String? = null,
     val lastLogon: GregorianCalendar? = null,
     val whenCreated: GregorianCalendar? = null
 ) {

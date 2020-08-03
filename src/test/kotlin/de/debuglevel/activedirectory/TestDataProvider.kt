@@ -1,5 +1,8 @@
 package de.debuglevel.activedirectory
 
+import de.debuglevel.activedirectory.user.SearchScope
+import de.debuglevel.activedirectory.user.User
+import de.debuglevel.activedirectory.user.UserActiveDirectoryService
 import org.assertj.core.api.Assertions
 import org.mockito.Mockito
 import java.util.stream.Stream
@@ -111,7 +114,7 @@ object TestDataProvider {
         val user: User? = null
     )
 
-    fun `set up activeDirectoryService mock`(activeDirectoryServiceMock: ActiveDirectoryService) {
+    fun `set up activeDirectoryService mock`(activeDirectoryServiceMock: UserActiveDirectoryService) {
         // getUser(searchValue, searchBy)
         run {
             for (accountTestData in validUserSearchProvider()) {

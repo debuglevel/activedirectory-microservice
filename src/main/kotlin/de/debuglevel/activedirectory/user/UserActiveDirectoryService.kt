@@ -1,4 +1,4 @@
-package de.debuglevel.activedirectory
+package de.debuglevel.activedirectory.user
 
 import io.micronaut.context.annotation.Property
 import mu.KotlinLogging
@@ -16,7 +16,7 @@ import javax.naming.ldap.*
 
 // see original at https://myjeeva.com/querying-active-directory-using-java.html
 @Singleton
-class ActiveDirectoryService(
+class UserActiveDirectoryService(
     @Property(name = "app.activedirectory.username") private val username: String,
     @Property(name = "app.activedirectory.password") private val password: String,
     @Property(name = "app.activedirectory.server") private val domainController: String,
@@ -75,10 +75,11 @@ class ActiveDirectoryService(
         val users = ArrayList<User>()
 
         try {
-            val filter = getFilter(
-                searchValue,
-                searchBy
-            )
+            val filter =
+                getFilter(
+                    searchValue,
+                    searchBy
+                )
 
             val ldapContext = createLdapContext()
 
@@ -166,7 +167,9 @@ class ActiveDirectoryService(
         val users = getUsers(searchValue, searchBy)
 
         if (users.count() > 1) {
-            throw MoreThanOneResultException(users)
+            throw MoreThanOneResultException(
+                users
+            )
         } else if (users.isEmpty()) {
             throw NoUserFoundException()
         }

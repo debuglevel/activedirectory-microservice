@@ -1,4 +1,4 @@
-package de.debuglevel.activedirectory
+package de.debuglevel.activedirectory.user
 
 enum class SearchScope {
     Email,

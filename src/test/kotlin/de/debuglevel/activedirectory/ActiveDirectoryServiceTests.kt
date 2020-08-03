@@ -4,6 +4,7 @@ import com.github.trevershick.test.ldap.LdapServerResource
 import com.github.trevershick.test.ldap.annotations.LdapAttribute
 import com.github.trevershick.test.ldap.annotations.LdapConfiguration
 import com.github.trevershick.test.ldap.annotations.LdapEntry
+import de.debuglevel.activedirectory.user.UserActiveDirectoryService
 import io.micronaut.context.ApplicationContext
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
@@ -57,13 +58,13 @@ class ActiveDirectoryServiceTests {
     private val logger = KotlinLogging.logger {}
 
     private lateinit var applicationContext: ApplicationContext
-    private lateinit var activeDirectoryService: ActiveDirectoryService
+    private lateinit var activeDirectoryService: UserActiveDirectoryService
 
     private lateinit var ldapServer: LdapServerResource
 
     private fun getValidActiveDirectory() = activeDirectoryService
     private fun getInvalidActiveDirectory() =
-        ActiveDirectoryService(
+        UserActiveDirectoryService(
             "cn=admin",
             "dsghkjfgh",
             "localhost:4711",
@@ -83,7 +84,7 @@ class ActiveDirectoryServiceTests {
         logger.debug { "Starting Micronaut ApplicationContext..." }
         applicationContext = ApplicationContext.run()
         logger.debug { "Initializing beans..." }
-        activeDirectoryService = applicationContext.getBean(ActiveDirectoryService::class.java)
+        activeDirectoryService = applicationContext.getBean(UserActiveDirectoryService::class.java)
     }
 
     private fun startLdap() {
@@ -118,7 +119,7 @@ class ActiveDirectoryServiceTests {
         // Arrange
 
         // Act
-        val dn = ActiveDirectoryService.getBaseDN(testData.value)
+        val dn = UserActiveDirectoryService.getBaseDN(testData.value)
 
         //Assert
         assertThat(dn).isEqualTo(testData.expectedDN)
@@ -132,7 +133,7 @@ class ActiveDirectoryServiceTests {
         // Arrange
 
         // Act
-        val dn = ActiveDirectoryService.getFilter(testData.value, testData.by)
+        val dn = UserActiveDirectoryService.getFilter(testData.value, testData.by)
 
         //Assert
         assertThat(dn).isEqualTo(testData.expectedFilter)
@@ -146,7 +147,7 @@ class ActiveDirectoryServiceTests {
 
         // Act & Assert
         Assertions.assertDoesNotThrow {
-            ActiveDirectoryService(
+            UserActiveDirectoryService(
                 "cn=admin",
                 "password",
                 "localhost:10389",
@@ -160,7 +161,7 @@ class ActiveDirectoryServiceTests {
         // Arrange
 
         // Act & Assert
-        assertThrows<ActiveDirectoryService.ConnectionException> {
+        assertThrows<UserActiveDirectoryService.ConnectionException> {
             getInvalidActiveDirectory().createLdapContext()
         }
     }

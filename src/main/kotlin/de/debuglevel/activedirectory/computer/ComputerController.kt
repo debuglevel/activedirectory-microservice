@@ -1,5 +1,6 @@
-package de.debuglevel.activedirectory
+package de.debuglevel.activedirectory.computer
 
+import de.debuglevel.activedirectory.user.UserActiveDirectoryService
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
@@ -21,13 +22,16 @@ class ComputerController(private val activeDirectoryService: ComputersActiveDire
         logger.debug("Called getOne($name)")
 
         return try {
-            val computer = activeDirectoryService.getComputer(name, ComputerSearchScope.Name)
+            val computer = activeDirectoryService.getComputer(
+                name,
+                SearchScope.Name
+            )
             HttpResponse.ok(ComputerResponse(computer))
-        } catch (e: ActiveDirectoryService.NoUserFoundException) {
+        } catch (e: UserActiveDirectoryService.NoUserFoundException) {
             HttpResponse.notFound(ComputerResponse(error = "Computer '$name' not found"))
-        } catch (e: ActiveDirectoryService.MoreThanOneResultException) {
+        } catch (e: UserActiveDirectoryService.MoreThanOneResultException) {
             HttpResponse.serverError(ComputerResponse(error = "Computer name '$name' is ambiguous"))
-        } catch (e: ActiveDirectoryService.ConnectionException) {
+        } catch (e: UserActiveDirectoryService.ConnectionException) {
             HttpResponse.serverError(ComputerResponse(error = "Could not connect to Active Directory"))
         }
     }
@@ -43,7 +47,7 @@ class ComputerController(private val activeDirectoryService: ComputersActiveDire
                 }.toSet()
 
             HttpResponse.ok(users)
-        } catch (e: ActiveDirectoryService.ConnectionException) {
+        } catch (e: UserActiveDirectoryService.ConnectionException) {
             val response = setOf(ComputerResponse(error = "Could not connect to Active Directory"))
             HttpResponse.serverError(response)
         }

@@ -1,4 +1,4 @@
-package de.debuglevel.activedirectory
+package de.debuglevel.activedirectory.user
 
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Controller
@@ -12,7 +12,7 @@ import mu.KotlinLogging
  */
 @Secured(SecurityRule.IS_AUTHENTICATED)
 @Controller("/users")
-class UserController(private val activeDirectoryService: ActiveDirectoryService) {
+class UserController(private val activeDirectoryService: UserActiveDirectoryService) {
     private val logger = KotlinLogging.logger {}
 
     @Get("/{username}")
@@ -22,11 +22,11 @@ class UserController(private val activeDirectoryService: ActiveDirectoryService)
         return try {
             val user = activeDirectoryService.getUser(username, SearchScope.Username)
             HttpResponse.ok(UserResponse(user))
-        } catch (e: ActiveDirectoryService.NoUserFoundException) {
+        } catch (e: UserActiveDirectoryService.NoUserFoundException) {
             HttpResponse.notFound(UserResponse(error = "User '$username' not found"))
-        } catch (e: ActiveDirectoryService.MoreThanOneResultException) {
+        } catch (e: UserActiveDirectoryService.MoreThanOneResultException) {
             HttpResponse.serverError(UserResponse(error = "Username '$username' is ambiguous"))
-        } catch (e: ActiveDirectoryService.ConnectionException) {
+        } catch (e: UserActiveDirectoryService.ConnectionException) {
             HttpResponse.serverError(UserResponse(error = "Could not connect to Active Directory"))
         }
     }
@@ -42,7 +42,7 @@ class UserController(private val activeDirectoryService: ActiveDirectoryService)
                 }.toSet()
 
             HttpResponse.ok(users)
-        } catch (e: ActiveDirectoryService.ConnectionException) {
+        } catch (e: UserActiveDirectoryService.ConnectionException) {
             val response = setOf(UserResponse(error = "Could not connect to Active Directory"))
             HttpResponse.serverError(response)
         }

@@ -1,7 +1,10 @@
 package de.debuglevel.activedirectory
 
+import de.debuglevel.activedirectory.user.UserResponse
 import io.micronaut.http.MediaType
-import io.micronaut.http.annotation.*
+import io.micronaut.http.annotation.Get
+import io.micronaut.http.annotation.Header
+import io.micronaut.http.annotation.Produces
 import io.micronaut.http.client.annotation.Client
 import io.reactivex.Single
 import javax.validation.constraints.NotBlank
