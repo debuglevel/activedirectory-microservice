@@ -1,6 +1,8 @@
 package de.debuglevel.activedirectory.user
 
-enum class UserSearchScope {
+import de.debuglevel.activedirectory.ActiveDirectorySearchScope
+
+enum class UserSearchScope : ActiveDirectorySearchScope {
     Email,
     Username
 }

@@ -198,12 +198,12 @@ object TestDataProvider {
         // getUser(searchValue, searchBy)
         run {
             for (computerTestData in validComputerSearchProvider()) {
-                Mockito.`when`(activeDirectoryServiceMock.getComputer(computerTestData.value, ComputerSearchScope.Name))
+                Mockito.`when`(activeDirectoryServiceMock.get(computerTestData.value, ComputerSearchScope.Name))
                     .then { invocation -> computerTestData.computer }
 
                 // check that mock works
                 val resultData =
-                    activeDirectoryServiceMock.getComputer(computerTestData.value, ComputerSearchScope.Name)
+                    activeDirectoryServiceMock.get(computerTestData.value, ComputerSearchScope.Name)
                 Assertions.assertThat(resultData).isEqualTo(computerTestData.computer)
                 //verify(dataService)?.fetchData(ISBN(bookData.isbn))
             }
@@ -213,11 +213,11 @@ object TestDataProvider {
         run {
             val computers = validComputerSearchProvider().map { it.computer }.toList()
 
-            Mockito.`when`(activeDirectoryServiceMock.getComputers())
+            Mockito.`when`(activeDirectoryServiceMock.getAll())
                 .then { invocation -> computers }
 
             // check that mock works
-            val resultData = activeDirectoryServiceMock.getComputers()
+            val resultData = activeDirectoryServiceMock.getAll()
             Assertions.assertThat(resultData).contains(*computers.toTypedArray())
         }
     }

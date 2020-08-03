@@ -1,5 +1,6 @@
 package de.debuglevel.activedirectory.computer
 
+import de.debuglevel.activedirectory.ActiveDirectoryEntity
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -11,7 +12,7 @@ data class Computer(
     val operatingSystemVersion: String? = null,
     val lastLogon: GregorianCalendar? = null,
     val whenCreated: GregorianCalendar? = null
-) {
+) : ActiveDirectoryEntity {
     /**
      * Account is disabled if bitwise 2 is set
      */

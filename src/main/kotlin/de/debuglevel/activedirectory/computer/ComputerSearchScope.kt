@@ -1,5 +1,7 @@
 package de.debuglevel.activedirectory.computer
 
-enum class ComputerSearchScope {
+import de.debuglevel.activedirectory.ActiveDirectorySearchScope
+
+enum class ComputerSearchScope : ActiveDirectorySearchScope {
     Name
 }

@@ -4,6 +4,8 @@ import com.github.trevershick.test.ldap.LdapServerResource
 import com.github.trevershick.test.ldap.annotations.LdapAttribute
 import com.github.trevershick.test.ldap.annotations.LdapConfiguration
 import com.github.trevershick.test.ldap.annotations.LdapEntry
+import de.debuglevel.activedirectory.ActiveDirectoryUtils
+import de.debuglevel.activedirectory.ActiveDirectoryUtils.getBaseDN
 import de.debuglevel.activedirectory.TestDataProvider
 import io.micronaut.context.ApplicationContext
 import mu.KotlinLogging
@@ -121,7 +123,7 @@ class ComputerActiveDirectoryServiceTests {
         // Arrange
 
         // Act
-        val dn = ComputerActiveDirectoryService.getBaseDN(testData.value)
+        val dn = getBaseDN(testData.value)
 
         //Assert
         assertThat(dn).isEqualTo(testData.expectedDN)
@@ -135,7 +137,7 @@ class ComputerActiveDirectoryServiceTests {
         // Arrange
 
         // Act
-        val dn = ComputerActiveDirectoryService.getFilter(testData.value, testData.by)
+        val dn = activeDirectoryService.buildFilter(testData.value, testData.by)
 
         //Assert
         assertThat(dn).isEqualTo(testData.expectedFilter)
@@ -163,7 +165,7 @@ class ComputerActiveDirectoryServiceTests {
         // Arrange
 
         // Act & Assert
-        assertThrows<ComputerActiveDirectoryService.ConnectionException> {
+        assertThrows<ActiveDirectoryUtils.ConnectionException> {
             getInvalidActiveDirectory().createLdapContext()
         }
     }
@@ -174,7 +176,7 @@ class ComputerActiveDirectoryServiceTests {
         // Arrange
 
         // Act
-        val computers = activeDirectoryService.getComputers(testData.value, testData.searchScope)
+        val computers = activeDirectoryService.getAll(testData.value, testData.searchScope)
 
         //Assert
         assertThat(computers).hasSize(1)
@@ -186,7 +188,7 @@ class ComputerActiveDirectoryServiceTests {
         // Arrange
 
         // Act
-        val computers = activeDirectoryService.getComputers()
+        val computers = activeDirectoryService.getAll()
 
         //Assert
         assertThat(computers).hasSize(validComputerSearchProvider().count().toInt())
@@ -202,7 +204,7 @@ class ComputerActiveDirectoryServiceTests {
         // Arrange
 
         // Act
-        val computers = activeDirectoryService.getComputers(testData.value, testData.searchScope)
+        val computers = activeDirectoryService.getAll(testData.value, testData.searchScope)
 
         //Assert
         assertThat(computers).hasSize(0)

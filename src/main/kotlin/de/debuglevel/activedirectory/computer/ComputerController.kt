@@ -22,7 +22,7 @@ class ComputerController(private val activeDirectoryService: ComputerActiveDirec
         logger.debug("Called getOne($name)")
 
         return try {
-            val computer = activeDirectoryService.getComputer(
+            val computer = activeDirectoryService.get(
                 name,
                 ComputerSearchScope.Name
             )
@@ -41,7 +41,7 @@ class ComputerController(private val activeDirectoryService: ComputerActiveDirec
         logger.debug("Called getList()")
 
         return try {
-            val users = activeDirectoryService.getComputers()
+            val users = activeDirectoryService.getAll()
                 .map {
                     ComputerResponse(it)
                 }.toSet()

@@ -1,0 +1,3 @@
+package de.debuglevel.activedirectory
+
+interface ActiveDirectorySearchScope
