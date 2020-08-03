@@ -4,6 +4,7 @@ import com.github.trevershick.test.ldap.LdapServerResource
 import com.github.trevershick.test.ldap.annotations.LdapAttribute
 import com.github.trevershick.test.ldap.annotations.LdapConfiguration
 import com.github.trevershick.test.ldap.annotations.LdapEntry
+import de.debuglevel.activedirectory.ActiveDirectoryService
 import de.debuglevel.activedirectory.ActiveDirectoryUtils
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.getBaseDN
 import de.debuglevel.activedirectory.TestDataProvider
@@ -60,17 +61,16 @@ class UserActiveDirectoryServiceTests {
     private val logger = KotlinLogging.logger {}
 
     private lateinit var applicationContext: ApplicationContext
-    private lateinit var activeDirectoryService: UserActiveDirectoryService
+    private lateinit var userActiveDirectoryService: UserActiveDirectoryService
 
     private lateinit var ldapServer: LdapServerResource
 
-    private fun getValidActiveDirectory() = activeDirectoryService
     private fun getInvalidActiveDirectory() =
-        UserActiveDirectoryService(
-            "cn=admin",
-            "dsghkjfgh",
-            "localhost:4711",
-            "dc=root"
+        ActiveDirectoryService(
+            username = "cn=admin",
+            password = "dsghkjfgh",
+            domainController = "localhost:4711",
+            searchBase = "dc=root"
         )
 
     @BeforeAll
@@ -86,7 +86,7 @@ class UserActiveDirectoryServiceTests {
         logger.debug { "Starting Micronaut ApplicationContext..." }
         applicationContext = ApplicationContext.run()
         logger.debug { "Initializing beans..." }
-        activeDirectoryService = applicationContext.getBean(UserActiveDirectoryService::class.java)
+        userActiveDirectoryService = applicationContext.getBean(UserActiveDirectoryService::class.java)
     }
 
     private fun startLdap() {
@@ -135,7 +135,7 @@ class UserActiveDirectoryServiceTests {
         // Arrange
 
         // Act
-        val dn = activeDirectoryService.buildFilter(testData.value, testData.by)
+        val dn = userActiveDirectoryService.buildFilter(testData.value, testData.by)
 
         //Assert
         assertThat(dn).isEqualTo(testData.expectedFilter)
@@ -143,21 +143,23 @@ class UserActiveDirectoryServiceTests {
 
     fun validUserFilterProvider() = TestDataProvider.validUserFilterProvider()
 
+    // TODO: move into own test suite
     @Test
     fun `connect to valid Active Directory`() {
         // Arrange
 
         // Act & Assert
         Assertions.assertDoesNotThrow {
-            UserActiveDirectoryService(
-                "cn=admin",
-                "password",
-                "localhost:10389",
-                "dc=root"
+            ActiveDirectoryService(
+                username = "cn=admin",
+                password = "password",
+                domainController = "localhost:10389",
+                searchBase = "dc=root"
             ).createLdapContext()
         }
     }
 
+    // TODO: move into own test suite
     @Test
     fun `connect to invalid Active Directory`() {
         // Arrange
@@ -170,15 +172,27 @@ class UserActiveDirectoryServiceTests {
 
     @ParameterizedTest
     @MethodSource("validUserSearchProvider")
-    fun `search valid users`(testData: TestDataProvider.AccountTestData) {
+    fun `search valid users`(testData: TestDataProvider.UserTestData) {
         // Arrange
 
         // Act
-        val users = activeDirectoryService.getAll(testData.value, testData.searchScope)
+        val users = userActiveDirectoryService.getAll(testData.value, testData.searchScope)
 
         //Assert
         assertThat(users).hasSize(1)
         assertThat(users).contains(testData.user)
+    }
+
+    @ParameterizedTest
+    @MethodSource("validUserSearchProvider")
+    fun `search valid user`(testData: TestDataProvider.UserTestData) {
+        // Arrange
+
+        // Act
+        val user = userActiveDirectoryService.get(testData.value, testData.searchScope)
+
+        //Assert
+        assertThat(user).isEqualTo(testData.user)
     }
 
     @Test
@@ -186,7 +200,7 @@ class UserActiveDirectoryServiceTests {
         // Arrange
 
         // Act
-        val users = activeDirectoryService.getAll()
+        val users = userActiveDirectoryService.getAll()
 
         //Assert
         assertThat(users).hasSize(2)
@@ -198,11 +212,11 @@ class UserActiveDirectoryServiceTests {
 
     @ParameterizedTest
     @MethodSource("invalidUserSearchProvider")
-    fun `search invalid users`(testData: TestDataProvider.AccountTestData) {
+    fun `search invalid users`(testData: TestDataProvider.UserTestData) {
         // Arrange
 
         // Act
-        val users = activeDirectoryService.getAll(testData.value, testData.searchScope)
+        val users = userActiveDirectoryService.getAll(testData.value, testData.searchScope)
 
         //Assert
         assertThat(users).hasSize(0)

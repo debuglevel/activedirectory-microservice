@@ -1,7 +1,9 @@
 package de.debuglevel.activedirectory
 
+import io.micronaut.context.annotation.Property
 import mu.KotlinLogging
 import java.io.IOException
+import javax.inject.Singleton
 import javax.naming.NamingException
 import javax.naming.directory.SearchControls
 import javax.naming.directory.SearchResult
@@ -10,37 +12,22 @@ import javax.naming.ldap.LdapContext
 import javax.naming.ldap.PagedResultsControl
 import javax.naming.ldap.PagedResultsResponseControl
 
-abstract class ActiveDirectoryService<T : ActiveDirectoryEntity>(
-    protected val username: String,
-    protected val password: String,
-    protected val domainController: String,
-    protected val searchBase: String
+@Singleton
+class ActiveDirectoryService(
+    @Property(name = "app.activedirectory.username") private val username: String,
+    @Property(name = "app.activedirectory.password") private val password: String,
+    @Property(name = "app.activedirectory.server") private val domainController: String,
+    @Property(name = "app.activedirectory.searchbase") private val searchBase: String
 ) {
     private val logger = KotlinLogging.logger {}
 
     protected val pageSize = 1000
 
-    /**
-     * Attributes which should be returned on a query
-     */
-    protected abstract val returnAttributes: Array<String>
-
-    /**
-     * LDAP filter to match certain group of objects
-     */
-    protected abstract val baseFilter: String
-
-    /**
-     * Name of the entity
-     */
-    protected abstract val entityName: String
-
-    protected val searchControls: SearchControls = SearchControls()
-
-    init {
-        // initializing search controls
-        searchControls.searchScope = SearchControls.SUBTREE_SCOPE
-        searchControls.returningAttributes = returnAttributes
+    private fun buildSearchControls(returnAttributes: Array<String>): SearchControls {
+        return SearchControls().apply {
+            searchScope = SearchControls.SUBTREE_SCOPE
+            returningAttributes = returnAttributes
+        }
     }
 
     fun createLdapContext(): LdapContext {
@@ -59,28 +46,13 @@ abstract class ActiveDirectoryService<T : ActiveDirectoryEntity>(
         }
     }
 
-    /**
-     * Active Directory filter string value
-     *
-     * @param searchValue a [java.lang.String] object - search value of username/email id for active directory
-     * @param searchBy a [java.lang.String] object - scope of search by username or email id
-     * @return a [java.lang.String] object - filter string
-     */
-    abstract fun buildFilter(searchValue: String, searchBy: ActiveDirectorySearchScope): String
+    fun getAll(filter: String, returnAttributes: Array<String>): List<SearchResult> {
+        logger.debug { "Getting all items of filter='$filter'..." }
 
-    /**
-     * Builds an entity object from the LDAP search result.
-     */
-    protected abstract fun build(it: SearchResult): T
-
-    fun getAll(searchValue: String, searchBy: ActiveDirectorySearchScope): List<T> {
-        logger.debug { "Getting all ${entityName}s searching by '$searchBy' with value='$searchValue'..." }
-
-        val items = mutableListOf<T>()
+        val searchResults = mutableListOf<SearchResult>()
+        val searchControls = buildSearchControls(returnAttributes)
 
         try {
-            val filter = buildFilter(searchValue, searchBy)
-
             val ldapContext = createLdapContext()
 
             // Activate paged results
@@ -93,9 +65,8 @@ abstract class ActiveDirectoryService<T : ActiveDirectoryEntity>(
                 val results = ldapContext.search(searchBase, filter, searchControls)
 
                 while (results.hasMoreElements()) {
-                    val result = results.nextElement()
-                    val item = build(result)
-                    items.add(item)
+                    val searchResult = results.nextElement()
+                    searchResults.add(searchResult)
                 }
 
                 // Examine the paged results control response
@@ -121,7 +92,7 @@ abstract class ActiveDirectoryService<T : ActiveDirectoryEntity>(
                 // Re-activate paged results
                 ldapContext.requestControls = arrayOf<Control>(PagedResultsControl(pageSize, cookie, Control.CRITICAL))
 
-                logger.debug { "Fetched a total of ${items.count()} entries." }
+                logger.debug { "Fetched a total of ${searchResults.count()} entries." }
             } while (cookie != null)
 
             closeLdapContext(ldapContext)
@@ -133,39 +104,29 @@ abstract class ActiveDirectoryService<T : ActiveDirectoryEntity>(
             logger.error(e) { "PagedSearch failed." }
         }
 
-        logger.debug { "Got ${items.count()} ${entityName}s searched by '$searchBy' with value='$searchValue'" }
-        return items
+        logger.debug { "Got ${searchResults.count()} items of filter='$filter'" }
+        return searchResults
     }
 
-    /**
-     * Gets all computers from the Active Directory for given search base
-     *
-     * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
-     * @throws NamingException
-     */
-    abstract fun getAll(): List<T>
+    fun get(filter: String, returnAttributes: Array<String>): SearchResult {
+        logger.debug { "Getting item with filter='$filter'..." }
 
-    fun get(searchValue: String, searchBy: ActiveDirectorySearchScope): T {
-        logger.debug { "Getting $entityName '$searchValue' by $searchBy..." }
+        val searchResults = getAll(filter, returnAttributes)
 
-        val items = getAll(searchValue, searchBy)
-
-        if (items.count() > 1) {
-            throw MoreThanOneResultException(items)
-        } else if (items.isEmpty()) {
+        if (searchResults.count() > 1) {
+            throw MoreThanOneResultException(searchResults)
+        } else if (searchResults.isEmpty()) {
             throw NoItemFoundException()
         }
 
-        val item = items.first()
+        val searchResult = searchResults.first()
 
-        logger.debug { "Got $entityName '$searchValue' by $searchBy: $item" }
-        return item
+        logger.debug { "Got item with filter='$filter: $searchResult" }
+        return searchResult
     }
 
-    class MoreThanOneResultException(items: List<ActiveDirectoryEntity>) :
+    class MoreThanOneResultException(items: List<SearchResult>) :
         Exception("Found more than one result: $items")
 
     class NoItemFoundException : Exception("No such item found")
-
-    class InvalidSearchScope(correct: String) : Exception("Invalid SearchScope, use $correct instead.")
 }

@@ -34,27 +34,27 @@ class UserControllerTests {
     lateinit var httpClient: HttpClient
 
     @Inject
-    var activeDirectoryServiceMock: UserActiveDirectoryService? = null
+    var userActiveDirectoryServiceMock: UserActiveDirectoryService? = null
 
     @MockBean(UserActiveDirectoryService::class)
-    fun activeDirectoryServiceMock(): UserActiveDirectoryService {
+    fun userActiveDirectoryServiceMock(): UserActiveDirectoryService {
         return mock(UserActiveDirectoryService::class.java)
     }
 
     @BeforeEach
     fun `set up mock`() {
-        TestDataProvider.`set up userActiveDirectoryService mock`(this.activeDirectoryServiceMock!!)
+        TestDataProvider.`set up userActiveDirectoryService mock`(this.userActiveDirectoryServiceMock!!)
     }
 
     @ParameterizedTest
     @MethodSource("validUserSearchProvider")
-    fun `retrieve person`(accountTestData: TestDataProvider.AccountTestData) {
+    fun `retrieve user`(userTestData: TestDataProvider.UserTestData) {
         // Arrange
-        val userResponse = UserResponse(accountTestData.user!!)
+        val userResponse = UserResponse(userTestData.user!!)
 
         // Act
         val retrieveUri = UriBuilder.of("/{username}")
-            .expand(mutableMapOf("username" to accountTestData.value))
+            .expand(mutableMapOf("username" to userTestData.value))
             .toString()
         val httpRequest = HttpRequest
             .GET<String>(retrieveUri)

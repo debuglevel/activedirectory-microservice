@@ -62,7 +62,7 @@ object TestDataProvider {
     )
 
     fun validUserSearchProvider() = Stream.of(
-        AccountTestData(
+        UserTestData(
             value = "maxmustermann", searchScope = UserSearchScope.Username, user = User(
                 "maxmustermann",
                 "Max",
@@ -70,7 +70,7 @@ object TestDataProvider {
                 "Max Mustermann"
             )
         ),
-        AccountTestData(
+        UserTestData(
             value = "max@mustermann.de", searchScope = UserSearchScope.Email, user = User(
                 "maxmustermann",
                 "Max",
@@ -78,7 +78,7 @@ object TestDataProvider {
                 "Max Mustermann"
             )
         ),
-        AccountTestData(
+        UserTestData(
             value = "alexaloah", searchScope = UserSearchScope.Username, user = User(
                 "alexaloah",
                 "Alex",
@@ -86,7 +86,7 @@ object TestDataProvider {
                 "Alex Aloah"
             )
         ),
-        AccountTestData(
+        UserTestData(
             value = "alex@aloah.de", searchScope = UserSearchScope.Email, user = User(
                 "alexaloah",
                 "Alex",
@@ -97,17 +97,17 @@ object TestDataProvider {
     )
 
     fun invalidUserSearchProvider() = Stream.of(
-        AccountTestData(
+        UserTestData(
             value = "heinzstrunk",
             searchScope = UserSearchScope.Username
         ),
-        AccountTestData(
+        UserTestData(
             value = "heinz@strunk.de",
             searchScope = UserSearchScope.Email
         ),
 
         // search by wrong value/scope combination
-        AccountTestData(
+        UserTestData(
             value = "maxmustermann", searchScope = UserSearchScope.Email, user = User(
                 "maxmustermann",
                 "Max",
@@ -115,7 +115,7 @@ object TestDataProvider {
                 "Max Mustermann"
             )
         ),
-        AccountTestData(
+        UserTestData(
             value = "max@mustermann.de", searchScope = UserSearchScope.Username, user = User(
                 "maxmustermann",
                 "Max",
@@ -125,7 +125,7 @@ object TestDataProvider {
         )
     )
 
-    data class AccountTestData(
+    data class UserTestData(
         val value: String,
         val searchScope: UserSearchScope,
         val user: User? = null
@@ -167,16 +167,17 @@ object TestDataProvider {
         val computer: Computer? = null
     )
 
-    fun `set up userActiveDirectoryService mock`(activeDirectoryServiceMock: UserActiveDirectoryService) {
+    fun `set up userActiveDirectoryService mock`(userActiveDirectoryServiceMock: UserActiveDirectoryService) {
         // getUser(searchValue, searchBy)
         run {
-            for (accountTestData in validUserSearchProvider()) {
-                Mockito.`when`(activeDirectoryServiceMock.get(accountTestData.value, UserSearchScope.Username))
-                    .then { invocation -> accountTestData.user }
+            for (userTestData in validUserSearchProvider()) {
+                Mockito
+                    .`when`(userActiveDirectoryServiceMock.get(userTestData.value, userTestData.searchScope))
+                    .then { userTestData.user }
 
                 // check that mock works
-                val resultData = activeDirectoryServiceMock.get(accountTestData.value, UserSearchScope.Username)
-                Assertions.assertThat(resultData).isEqualTo(accountTestData.user)
+                val resultData = userActiveDirectoryServiceMock.get(userTestData.value, userTestData.searchScope)
+                Assertions.assertThat(resultData).isEqualTo(userTestData.user)
                 //verify(dataService)?.fetchData(ISBN(bookData.isbn))
             }
         }
@@ -185,25 +186,32 @@ object TestDataProvider {
         run {
             val users = validUserSearchProvider().map { it.user }.toList()
 
-            Mockito.`when`(activeDirectoryServiceMock.getAll())
-                .then { invocation -> users }
+            Mockito
+                .`when`(userActiveDirectoryServiceMock.getAll())
+                .then { users }
 
             // check that mock works
-            val resultData = activeDirectoryServiceMock.getAll()
+            val resultData = userActiveDirectoryServiceMock.getAll()
             Assertions.assertThat(resultData).contains(*users.toTypedArray())
         }
     }
 
-    fun `set up computerActiveDirectoryService mock`(activeDirectoryServiceMock: ComputerActiveDirectoryService) {
+    fun `set up computerActiveDirectoryService mock`(computerActiveDirectoryServiceMock: ComputerActiveDirectoryService) {
         // getUser(searchValue, searchBy)
         run {
             for (computerTestData in validComputerSearchProvider()) {
-                Mockito.`when`(activeDirectoryServiceMock.get(computerTestData.value, ComputerSearchScope.Name))
-                    .then { invocation -> computerTestData.computer }
+                Mockito
+                    .`when`(
+                        computerActiveDirectoryServiceMock.get(
+                            computerTestData.value,
+                            computerTestData.searchScope
+                        )
+                    )
+                    .then { computerTestData.computer }
 
                 // check that mock works
                 val resultData =
-                    activeDirectoryServiceMock.get(computerTestData.value, ComputerSearchScope.Name)
+                    computerActiveDirectoryServiceMock.get(computerTestData.value, computerTestData.searchScope)
                 Assertions.assertThat(resultData).isEqualTo(computerTestData.computer)
                 //verify(dataService)?.fetchData(ISBN(bookData.isbn))
             }
@@ -213,11 +221,12 @@ object TestDataProvider {
         run {
             val computers = validComputerSearchProvider().map { it.computer }.toList()
 
-            Mockito.`when`(activeDirectoryServiceMock.getAll())
-                .then { invocation -> computers }
+            Mockito
+                .`when`(computerActiveDirectoryServiceMock.getAll())
+                .then { computers }
 
             // check that mock works
-            val resultData = activeDirectoryServiceMock.getAll()
+            val resultData = computerActiveDirectoryServiceMock.getAll()
             Assertions.assertThat(resultData).contains(*computers.toTypedArray())
         }
     }

@@ -4,7 +4,7 @@ import de.debuglevel.activedirectory.ActiveDirectorySearchScope
 import de.debuglevel.activedirectory.ActiveDirectoryService
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.convertLdapTimestampToDate
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.getAttributeValue
-import io.micronaut.context.annotation.Property
+import de.debuglevel.activedirectory.EntityActiveDirectoryService
 import mu.KotlinLogging
 import javax.inject.Singleton
 import javax.naming.directory.SearchResult
@@ -12,17 +12,13 @@ import javax.naming.directory.SearchResult
 // see original at https://myjeeva.com/querying-active-directory-using-java.html
 @Singleton
 class ComputerActiveDirectoryService(
-    @Property(name = "app.activedirectory.username") username: String,
-    @Property(name = "app.activedirectory.password") password: String,
-    @Property(name = "app.activedirectory.server") domainController: String,
-    @Property(name = "app.activedirectory.searchbase") searchBase: String
-) : ActiveDirectoryService<Computer>(
-    username,
-    password,
-    domainController,
-    searchBase
-) {
+    private val activeDirectoryService: ActiveDirectoryService
+) : EntityActiveDirectoryService<Computer> {
     private val logger = KotlinLogging.logger {}
+
+    override val baseFilter = "(&(objectCategory=Computer)(objectClass=Computer))"
+
+    override val entityName = "computer"
 
     override val returnAttributes =
         arrayOf(
@@ -40,8 +36,30 @@ class ComputerActiveDirectoryService(
 
         val computers = getAll("*", ComputerSearchScope.Name)
 
-        logger.debug { "Got ${computers.count()} computers..." }
+        logger.debug { "Got ${computers.count()} computers" }
         return computers
+    }
+
+    override fun getAll(searchValue: String, searchBy: ActiveDirectorySearchScope): List<Computer> {
+        logger.debug { "Getting all computers with $searchBy='$searchValue'..." }
+
+        val filter = buildFilter(searchValue, searchBy)
+        val searchResults = activeDirectoryService.getAll(filter, returnAttributes)
+        val computers = searchResults.map { build(it) }
+
+        logger.debug { "Got ${computers.count()} computers with $searchBy='$searchValue'" }
+        return computers
+    }
+
+    override fun get(searchValue: String, searchBy: ActiveDirectorySearchScope): Computer {
+        logger.debug { "Getting computer $searchBy='$searchValue'..." }
+
+        val filter = buildFilter(searchValue, searchBy)
+        val searchResult = activeDirectoryService.get(filter, returnAttributes)
+        val computer = build(searchResult)
+
+        logger.debug { "Got computer $searchBy='$searchValue': $computer" }
+        return computer
     }
 
     override fun build(it: SearchResult): Computer {
@@ -83,14 +101,10 @@ class ComputerActiveDirectoryService(
 
         val filter = when (searchBy) {
             ComputerSearchScope.Name -> "(&($baseFilter)(name=$searchValue))"
-            else -> throw InvalidSearchScope("ComputerSearchScope")
+            else -> throw EntityActiveDirectoryService.InvalidSearchScope("ComputerSearchScope")
         }
 
         logger.debug { "Built filter for searching by '$searchBy' for '$searchValue': $filter" }
         return filter
     }
-
-    override val baseFilter = "(&(objectCategory=Computer)(objectClass=Computer))"
-
-    override val entityName = "computer"
 }

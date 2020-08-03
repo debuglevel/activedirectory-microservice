@@ -14,7 +14,9 @@ import mu.KotlinLogging
  */
 @Secured(SecurityRule.IS_AUTHENTICATED)
 @Controller("/computers")
-class ComputerController(private val activeDirectoryService: ComputerActiveDirectoryService) {
+class ComputerController(
+    private val computerActiveDirectoryService: ComputerActiveDirectoryService
+) {
     private val logger = KotlinLogging.logger {}
 
     @Get("/{name}")
@@ -22,7 +24,7 @@ class ComputerController(private val activeDirectoryService: ComputerActiveDirec
         logger.debug("Called getOne($name)")
 
         return try {
-            val computer = activeDirectoryService.get(
+            val computer = computerActiveDirectoryService.get(
                 name,
                 ComputerSearchScope.Name
             )
@@ -41,7 +43,7 @@ class ComputerController(private val activeDirectoryService: ComputerActiveDirec
         logger.debug("Called getList()")
 
         return try {
-            val users = activeDirectoryService.getAll()
+            val users = computerActiveDirectoryService.getAll()
                 .map {
                     ComputerResponse(it)
                 }.toSet()

@@ -4,13 +4,16 @@ import com.github.trevershick.test.ldap.LdapServerResource
 import com.github.trevershick.test.ldap.annotations.LdapAttribute
 import com.github.trevershick.test.ldap.annotations.LdapConfiguration
 import com.github.trevershick.test.ldap.annotations.LdapEntry
-import de.debuglevel.activedirectory.ActiveDirectoryUtils
+import de.debuglevel.activedirectory.ActiveDirectoryService
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.getBaseDN
 import de.debuglevel.activedirectory.TestDataProvider
 import io.micronaut.context.ApplicationContext
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
@@ -62,17 +65,16 @@ class ComputerActiveDirectoryServiceTests {
     private val logger = KotlinLogging.logger {}
 
     private lateinit var applicationContext: ApplicationContext
-    private lateinit var activeDirectoryService: ComputerActiveDirectoryService
+    private lateinit var computerActiveDirectoryService: ComputerActiveDirectoryService
 
     private lateinit var ldapServer: LdapServerResource
 
-    private fun getValidActiveDirectory() = activeDirectoryService
     private fun getInvalidActiveDirectory() =
-        ComputerActiveDirectoryService(
-            "cn=admin",
-            "dsghkjfgh",
-            "localhost:4711",
-            "dc=root"
+        ActiveDirectoryService(
+            username = "cn=admin",
+            password = "dsghkjfgh",
+            domainController = "localhost:4711",
+            searchBase = "dc=root"
         )
 
     @BeforeAll
@@ -88,7 +90,7 @@ class ComputerActiveDirectoryServiceTests {
         logger.debug { "Starting Micronaut ApplicationContext..." }
         applicationContext = ApplicationContext.run()
         logger.debug { "Initializing beans..." }
-        activeDirectoryService = applicationContext.getBean(ComputerActiveDirectoryService::class.java)
+        computerActiveDirectoryService = applicationContext.getBean(ComputerActiveDirectoryService::class.java)
     }
 
     private fun startLdap() {
@@ -137,7 +139,7 @@ class ComputerActiveDirectoryServiceTests {
         // Arrange
 
         // Act
-        val dn = activeDirectoryService.buildFilter(testData.value, testData.by)
+        val dn = computerActiveDirectoryService.buildFilter(testData.value, testData.by)
 
         //Assert
         assertThat(dn).isEqualTo(testData.expectedFilter)
@@ -145,42 +147,29 @@ class ComputerActiveDirectoryServiceTests {
 
     fun validComputerFilterProvider() = TestDataProvider.validComputerFilterProvider()
 
-    @Test
-    fun `connect to valid Active Directory`() {
-        // Arrange
-
-        // Act & Assert
-        Assertions.assertDoesNotThrow {
-            ComputerActiveDirectoryService(
-                "cn=admin",
-                "password",
-                "localhost:10389",
-                "dc=root"
-            ).createLdapContext()
-        }
-    }
-
-    @Test
-    fun `connect to invalid Active Directory`() {
-        // Arrange
-
-        // Act & Assert
-        assertThrows<ActiveDirectoryUtils.ConnectionException> {
-            getInvalidActiveDirectory().createLdapContext()
-        }
-    }
-
     @ParameterizedTest
     @MethodSource("validComputerSearchProvider")
     fun `search valid computers`(testData: TestDataProvider.ComputerTestData) {
         // Arrange
 
         // Act
-        val computers = activeDirectoryService.getAll(testData.value, testData.searchScope)
+        val computers = computerActiveDirectoryService.getAll(testData.value, testData.searchScope)
 
         //Assert
         assertThat(computers).hasSize(1)
         assertThat(computers).contains(testData.computer)
+    }
+
+    @ParameterizedTest
+    @MethodSource("validComputerSearchProvider")
+    fun `search valid computer`(testData: TestDataProvider.ComputerTestData) {
+        // Arrange
+
+        // Act
+        val computer = computerActiveDirectoryService.get(testData.value, testData.searchScope)
+
+        //Assert
+        assertThat(computer).isEqualTo(testData.computer)
     }
 
     @Test
@@ -188,7 +177,7 @@ class ComputerActiveDirectoryServiceTests {
         // Arrange
 
         // Act
-        val computers = activeDirectoryService.getAll()
+        val computers = computerActiveDirectoryService.getAll()
 
         //Assert
         assertThat(computers).hasSize(validComputerSearchProvider().count().toInt())
@@ -204,7 +193,7 @@ class ComputerActiveDirectoryServiceTests {
         // Arrange
 
         // Act
-        val computers = activeDirectoryService.getAll(testData.value, testData.searchScope)
+        val computers = computerActiveDirectoryService.getAll(testData.value, testData.searchScope)
 
         //Assert
         assertThat(computers).hasSize(0)

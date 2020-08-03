@@ -14,7 +14,9 @@ import mu.KotlinLogging
  */
 @Secured(SecurityRule.IS_AUTHENTICATED)
 @Controller("/users")
-class UserController(private val activeDirectoryService: UserActiveDirectoryService) {
+class UserController(
+    private val userActiveDirectoryService: UserActiveDirectoryService
+) {
     private val logger = KotlinLogging.logger {}
 
     @Get("/{username}")
@@ -22,7 +24,7 @@ class UserController(private val activeDirectoryService: UserActiveDirectoryServ
         logger.debug("Called getOne($username)")
 
         return try {
-            val user = activeDirectoryService.get(username, UserSearchScope.Username)
+            val user = userActiveDirectoryService.get(username, UserSearchScope.Username)
             HttpResponse.ok(UserResponse(user))
         } catch (e: ActiveDirectoryService.NoItemFoundException) {
             HttpResponse.notFound(UserResponse(error = "User '$username' not found"))
@@ -38,7 +40,7 @@ class UserController(private val activeDirectoryService: UserActiveDirectoryServ
         logger.debug("Called getList()")
 
         return try {
-            val users = activeDirectoryService.getAll()
+            val users = userActiveDirectoryService.getAll()
                 .map {
                     UserResponse(it)
                 }.toSet()

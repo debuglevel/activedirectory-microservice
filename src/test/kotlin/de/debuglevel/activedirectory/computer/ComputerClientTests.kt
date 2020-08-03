@@ -39,34 +39,34 @@ class ComputerClientTests {
         }
 
     @Inject
-    var activeDirectoryServiceMock: ComputerActiveDirectoryService? = null
+    var computerActiveDirectoryServiceMock: ComputerActiveDirectoryService? = null
 
     @MockBean(ComputerActiveDirectoryService::class)
-    fun activeDirectoryServiceMock(): ComputerActiveDirectoryService {
+    fun computerActiveDirectoryServiceMock(): ComputerActiveDirectoryService {
         return mock(ComputerActiveDirectoryService::class.java)
     }
 
     @BeforeEach
     fun `set up mock`() {
-        `set up computerActiveDirectoryService mock`(this.activeDirectoryServiceMock!!)
+        `set up computerActiveDirectoryService mock`(this.computerActiveDirectoryServiceMock!!)
     }
 
     @ParameterizedTest
     @MethodSource("validComputerSearchProvider")
-    fun `retrieve person`(computerTestData: TestDataProvider.ComputerTestData) {
+    fun `retrieve computer`(computerTestData: TestDataProvider.ComputerTestData) {
         // Arrange
         val computerResponse = ComputerResponse(computerTestData.computer!!)
 
         // Act
-        val retrievedPerson = computerClient.getOne(computerTestData.value, basicAuthenticationHeader).blockingGet()
+        val retrievedComputer = computerClient.getOne(computerTestData.value, basicAuthenticationHeader).blockingGet()
 
         // Assert
-        Assertions.assertThat(retrievedPerson).isEqualTo(computerResponse)
+        Assertions.assertThat(retrievedComputer).isEqualTo(computerResponse)
     }
 
     @ParameterizedTest
     @MethodSource("validComputerSearchProvider")
-    fun `retrieve person with bad authentication`(computerTestData: TestDataProvider.ComputerTestData) {
+    fun `retrieve computer with bad authentication`(computerTestData: TestDataProvider.ComputerTestData) {
         // Arrange
 
         // Act
@@ -85,13 +85,13 @@ class ComputerClientTests {
         // Arrange
 
         // Act
-        val retrievedPersons = computerClient.getJsonList(basicAuthenticationHeader)
+        val retrievedComputers = computerClient.getJsonList(basicAuthenticationHeader)
 
         // Assert
         validComputerSearchProvider().forEach { testData ->
             val computerResponse = ComputerResponse(testData.computer!!)
 
-            Assertions.assertThat(retrievedPersons)
+            Assertions.assertThat(retrievedComputers)
                 .anyMatch { retrieved -> retrieved == computerResponse }
         }
     }

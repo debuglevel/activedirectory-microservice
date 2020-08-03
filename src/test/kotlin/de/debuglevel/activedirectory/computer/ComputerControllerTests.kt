@@ -34,10 +34,10 @@ class ComputerControllerTests {
     lateinit var httpClient: HttpClient
 
     @Inject
-    var activeDirectoryServiceMock: ComputerActiveDirectoryService? = null
+    var computerActiveDirectoryServiceMock: ComputerActiveDirectoryService? = null
 
     @MockBean(ComputerActiveDirectoryService::class)
-    fun activeDirectoryServiceMock(): ComputerActiveDirectoryService {
+    fun computerActiveDirectoryServiceMock(): ComputerActiveDirectoryService {
         logger.debug { "Creating mock..." }
         return mock(ComputerActiveDirectoryService::class.java)
     }
@@ -45,7 +45,7 @@ class ComputerControllerTests {
     @BeforeEach
     fun `set up mock`() {
         logger.debug { "Setting up mock..." }
-        TestDataProvider.`set up computerActiveDirectoryService mock`(this.activeDirectoryServiceMock!!)
+        TestDataProvider.`set up computerActiveDirectoryService mock`(this.computerActiveDirectoryServiceMock!!)
     }
 
     @ParameterizedTest

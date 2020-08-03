@@ -39,26 +39,26 @@ class UserClientTests {
         }
 
     @Inject
-    var activeDirectoryServiceMock: UserActiveDirectoryService? = null
+    var userActiveDirectoryServiceMock: UserActiveDirectoryService? = null
 
     @MockBean(UserActiveDirectoryService::class)
-    fun activeDirectoryServiceMock(): UserActiveDirectoryService {
+    fun userActiveDirectoryServiceMock(): UserActiveDirectoryService {
         return mock(UserActiveDirectoryService::class.java)
     }
 
     @BeforeEach
     fun `set up mock`() {
-        `set up userActiveDirectoryService mock`(this.activeDirectoryServiceMock!!)
+        `set up userActiveDirectoryService mock`(this.userActiveDirectoryServiceMock!!)
     }
 
     @ParameterizedTest
     @MethodSource("validUserSearchProvider")
-    fun `retrieve person`(accountTestData: TestDataProvider.AccountTestData) {
+    fun `retrieve user`(userTestData: TestDataProvider.UserTestData) {
         // Arrange
-        val userResponse = UserResponse(accountTestData.user!!)
+        val userResponse = UserResponse(userTestData.user!!)
 
         // Act
-        val retrievedPerson = userClient.getOne(accountTestData.value, basicAuthenticationHeader).blockingGet()
+        val retrievedPerson = userClient.getOne(userTestData.value, basicAuthenticationHeader).blockingGet()
 
         // Assert
         Assertions.assertThat(retrievedPerson).isEqualTo(userResponse)
@@ -66,12 +66,12 @@ class UserClientTests {
 
     @ParameterizedTest
     @MethodSource("validUserSearchProvider")
-    fun `retrieve person with bad authentication`(accountTestData: TestDataProvider.AccountTestData) {
+    fun `retrieve user with bad authentication`(userTestData: TestDataProvider.UserTestData) {
         // Arrange
 
         // Act
         val thrown = Assertions.catchThrowable {
-            userClient.getOne(accountTestData.value, badBasicAuthenticationHeader).blockingGet()
+            userClient.getOne(userTestData.value, badBasicAuthenticationHeader).blockingGet()
         }
 
         // Assert
