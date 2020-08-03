@@ -5,14 +5,8 @@ import de.debuglevel.activedirectory.ActiveDirectoryService
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.convertLdapTimestampToDate
 import io.micronaut.context.annotation.Property
 import mu.KotlinLogging
-import java.io.IOException
-import java.util.*
 import javax.inject.Singleton
-import javax.naming.NamingException
 import javax.naming.directory.SearchResult
-import javax.naming.ldap.Control
-import javax.naming.ldap.PagedResultsControl
-import javax.naming.ldap.PagedResultsResponseControl
 
 // see original at https://myjeeva.com/querying-active-directory-using-java.html
 @Singleton
@@ -39,67 +33,6 @@ class ComputerActiveDirectoryService(
             "operatingSystem",
             "operatingSystemVersion"
         )
-
-    override fun getAll(searchValue: String, searchBy: ActiveDirectorySearchScope): List<Computer> {
-        val computers = ArrayList<Computer>()
-
-        try {
-            val filter = buildFilter(searchValue, searchBy)
-
-            val ldapContext = createLdapContext()
-
-            // Activate paged results
-            var cookie: ByteArray? = null
-            ldapContext.requestControls = arrayOf<Control>(PagedResultsControl(pageSize, Control.NONCRITICAL))
-
-            do {
-                logger.debug { "Requesting page..." }
-
-                val results = ldapContext.search(searchBase, filter, searchControls)
-
-                while (results.hasMoreElements()) {
-                    val result = results.nextElement()
-                    val computer = build(result)
-                    computers.add(computer)
-                }
-
-                // Examine the paged results control response
-                val controls = ldapContext.responseControls
-                if (controls != null) {
-                    val pagedResultsResponseControls = controls
-                        .filterIsInstance<PagedResultsResponseControl>()
-                        .map { it }
-                    for (pagedResultsResponseControl in pagedResultsResponseControls) {
-                        val resultSize = when {
-                            pagedResultsResponseControl.resultSize != 0 -> "${pagedResultsResponseControl.resultSize}"
-                            else -> "unknown"
-                        }
-
-                        logger.debug { "Page ended (total: $resultSize)" }
-
-                        cookie = pagedResultsResponseControl.cookie
-                    }
-                } else {
-                    logger.debug("No controls were sent from the server")
-                }
-
-                // Re-activate paged results
-                ldapContext.requestControls = arrayOf<Control>(PagedResultsControl(pageSize, cookie, Control.CRITICAL))
-
-                logger.debug { "Fetched a total of ${computers.count()} entries." }
-            } while (cookie != null)
-
-            closeLdapContext(ldapContext)
-        } catch (e: NamingException) {
-            logger.error(e) { "PagedSearch failed." }
-        } catch (e: IOException) {
-            logger.error(e) { "PagedSearch failed." }
-        } catch (e: Exception) {
-            logger.error(e) { "PagedSearch failed." }
-        }
-
-        return computers
-    }
 
     override fun getAll(): List<Computer> {
         logger.debug { "Getting all computers..." }

@@ -1,12 +1,16 @@
 package de.debuglevel.activedirectory
 
 import mu.KotlinLogging
+import java.io.IOException
 import javax.naming.NamingException
 import javax.naming.directory.SearchControls
 import javax.naming.directory.SearchResult
+import javax.naming.ldap.Control
 import javax.naming.ldap.LdapContext
+import javax.naming.ldap.PagedResultsControl
+import javax.naming.ldap.PagedResultsResponseControl
 
-abstract class ActiveDirectoryService<T>(
+abstract class ActiveDirectoryService<T : ActiveDirectoryEntity>(
     protected val username: String,
     protected val password: String,
     protected val domainController: String,
@@ -62,17 +66,68 @@ abstract class ActiveDirectoryService<T>(
     /**
      * Builds an entity object from the LDAP search result.
      */
-    protected abstract fun build(it: SearchResult): ActiveDirectoryEntity
+    protected abstract fun build(it: SearchResult): T
 
-    /**
-     * Gets users from the Active Directory by username/email id for given search base
-     *
-     * @param searchValue a [java.lang.String] object - search value used for AD search for eg. username or email
-     * @param searchBy a [java.lang.String] object - scope of search by username or by email id
-     * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
-     * @throws NamingException
-     */
-    abstract fun getAll(searchValue: String, searchBy: ActiveDirectorySearchScope): List<ActiveDirectoryEntity>
+    fun getAll(searchValue: String, searchBy: ActiveDirectorySearchScope): List<T> {
+        val items = ArrayList<T>()
+
+        try {
+            val filter = buildFilter(searchValue, searchBy)
+
+            val ldapContext = createLdapContext()
+
+            // Activate paged results
+            var cookie: ByteArray? = null
+            ldapContext.requestControls = arrayOf<Control>(PagedResultsControl(pageSize, Control.NONCRITICAL))
+
+            do {
+                logger.debug { "Requesting page..." }
+
+                val results = ldapContext.search(searchBase, filter, searchControls)
+
+                while (results.hasMoreElements()) {
+                    val result = results.nextElement()
+                    val item = build(result)
+                    items.add(item)
+                }
+
+                // Examine the paged results control response
+                val controls = ldapContext.responseControls
+                if (controls != null) {
+                    val pagedResultsResponseControls = controls
+                        .filterIsInstance<PagedResultsResponseControl>()
+                        .map { it }
+                    for (pagedResultsResponseControl in pagedResultsResponseControls) {
+                        val resultSize = when {
+                            pagedResultsResponseControl.resultSize != 0 -> "${pagedResultsResponseControl.resultSize}"
+                            else -> "unknown"
+                        }
+
+                        logger.debug { "Page ended (total: $resultSize)" }
+
+                        cookie = pagedResultsResponseControl.cookie
+                    }
+                } else {
+                    logger.debug("No controls were sent from the server")
+                }
+
+                // Re-activate paged results
+                ldapContext.requestControls = arrayOf<Control>(PagedResultsControl(pageSize, cookie, Control.CRITICAL))
+
+                logger.debug { "Fetched a total of ${items.count()} entries." }
+            } while (cookie != null)
+
+            closeLdapContext(ldapContext)
+        } catch (e: NamingException) {
+            logger.error(e) { "PagedSearch failed." }
+        } catch (e: IOException) {
+            logger.error(e) { "PagedSearch failed." }
+        } catch (e: Exception) {
+            logger.error(e) { "PagedSearch failed." }
+        }
+
+        return items
+    }
 
     /**
      * Gets all computers from the Active Directory for given search base
@@ -80,7 +135,7 @@ abstract class ActiveDirectoryService<T>(
      * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
      * @throws NamingException
      */
-    abstract fun getAll(): List<ActiveDirectoryEntity>
+    abstract fun getAll(): List<T>
 
     /**
      * Gets an user from the Active Directory by username/email id for given search base
@@ -90,7 +145,7 @@ abstract class ActiveDirectoryService<T>(
      * @return search result a [javax.naming.NamingEnumeration] object - active directory search result
      * @throws NamingException
      */
-    abstract fun get(searchValue: String, searchBy: ActiveDirectorySearchScope): ActiveDirectoryEntity
+    abstract fun get(searchValue: String, searchBy: ActiveDirectorySearchScope): T
 
     class MoreThanOneResultException(items: List<ActiveDirectoryEntity>) :
         Exception("Found more than one result: $items")
