@@ -12,7 +12,7 @@ This is a simple REST microservice for some basic queries on a Microsoft Active 
 ## Swagger / OpenAPI
 There is an OpenAPI (former: Swagger) specification created, which is available at <http://localhost:8080/swagger/activedirectory-microservice-0.2.0.yml> (or somewhere in the jar file). It can easily be pasted into the [Swagger Editor](https://editor.swagger.io) which provides a live demo for [Swagger UI](https://swagger.io/tools/swagger-ui/), but also offers to create client libraries via [Swagger Codegen](https://swagger.io/tools/swagger-codegen/).
 
-## Get information
+## Users
 To get information about a single user, send a GET request to the service:
 
 ```
@@ -50,6 +50,32 @@ $ curl -X GET http://localhost:8080/users/ -H "Authorization: Basic U0VDUkVUX1VT
         "cn": "Max Mustermann",
         "disabled": false
     }
+]
+```
+
+## Computers
+```
+$ echo "SECRET_USERNAME:SECRET_PASSWORD" | base64
+U0VDUkVUX1VTRVJOQU1FOlNFQ1JFVF9QQVNTV09SRAo=
+
+$ curl -X GET http://localhost:8080/computers/ -H "Authorization: Basic U0VDUkVUX1VTRVJOQU1FOlNFQ1JFVF9QQVNTV09SRA=="
+[
+  {
+    "cn": "Desktop",
+    "logonCount": 42,
+    "operatingSystem": "Windows 10 Pro",
+    "operatingSystemVersion": "10.0 (17134)",
+    "lastLogon": "2020-08-04 12:34:56",
+    "whenCreated": "2019-12-24 12:34:56"
+  },
+  {
+    "cn": "Laptop",
+    "logonCount": 23,
+    "operatingSystem": "Windows 7 Professional",
+    "operatingSystemVersion": "6.1 (7601)",
+    "lastLogon": "2020-08-04 12:34:56",
+    "whenCreated": "2019-12-24 12:34:56"
+  }
 ]
 ```
 
