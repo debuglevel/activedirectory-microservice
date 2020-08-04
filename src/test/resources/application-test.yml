@@ -12,3 +12,5 @@ micronaut:
   server:
     # for unit testing, assign random ports
     port: -1
+  security:
+    enabled: true # default: false; ensure true for testing
