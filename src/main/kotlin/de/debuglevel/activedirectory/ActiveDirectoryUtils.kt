@@ -70,8 +70,36 @@ object ActiveDirectoryUtils {
         }
     }
 
-    fun SearchResult.getAttributeValue(attributeName: String) =
-        attributes.get(attributeName)?.toString()?.substringAfter(": ")
+    fun SearchResult.getAttributeValue(attributeName: String): String? {
+        logger.trace { "Getting attribute '$attributeName' value..." }
+        val attribute = attributes.get(attributeName)
+        logger.trace { "Got attribute '$attributeName': $attribute" }
+        val value = attribute?.toString()?.substringAfter(": ")
+        logger.trace { "Got attribute '$attributeName' value: $value" }
+        return value
+    }
+
+    fun toUUID(attributeValue: String?): UUID? {
+        logger.debug { "Converting '$attributeValue' to UUID..." }
+
+        if (attributeValue.isNullOrBlank()) {
+            return null
+        }
+
+        val string = attributeValue
+        logger.trace { "String: $string" }
+        val bytes = string.toByteArray(Charsets.US_ASCII)
+        logger.debug { "Bytes: ${bytesToHexString(bytes)} (${bytes.size})" } // BUG: sometimes it's not 16 bytes
+        val uuid = UUIDUtils.bytesToUUID(bytes)
+        logger.trace { "UUID: $uuid" }
+
+        logger.debug { "Converted $attributeValue to UUID: $uuid" }
+        return uuid
+    }
+
+    private fun bytesToHexString(bytes: ByteArray): String {
+        return bytes.joinToString(" ") { String.format("%02X", it) }
+    }
 
     class ConnectionException(e: Exception) : Exception("Could not connect to LDAP server", e)
 }

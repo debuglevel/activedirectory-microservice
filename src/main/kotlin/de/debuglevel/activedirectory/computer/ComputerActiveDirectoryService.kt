@@ -4,6 +4,7 @@ import de.debuglevel.activedirectory.ActiveDirectorySearchScope
 import de.debuglevel.activedirectory.ActiveDirectoryService
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.convertLdapTimestampToDate
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.getAttributeValue
+import de.debuglevel.activedirectory.ActiveDirectoryUtils.toUUID
 import de.debuglevel.activedirectory.EntityActiveDirectoryService
 import mu.KotlinLogging
 import javax.inject.Singleton
@@ -28,7 +29,8 @@ class ComputerActiveDirectoryService(
             "whenCreated",
             "logonCount",
             "operatingSystem",
-            "operatingSystemVersion"
+            "operatingSystemVersion",
+            "objectGUID"
         )
 
     override fun getAll(): List<Computer> {
@@ -66,6 +68,7 @@ class ComputerActiveDirectoryService(
         val commonName = it.getAttributeValue("cn")
         val operatingSystem = it.getAttributeValue("operatingSystem")
         val operatingSystemVersion = it.getAttributeValue("operatingSystemVersion")
+        val guid = toUUID(it.getAttributeValue("objectGUID"))
         val logonCount = it.getAttributeValue("logonCount")?.toInt()
         val userAccountControl = it.getAttributeValue("userAccountControl")?.toIntOrNull()
         val lastLogon = {
@@ -91,6 +94,7 @@ class ComputerActiveDirectoryService(
             logonCount,
             operatingSystem,
             operatingSystemVersion,
+            guid,
             lastLogon,
             whenCreated
         )

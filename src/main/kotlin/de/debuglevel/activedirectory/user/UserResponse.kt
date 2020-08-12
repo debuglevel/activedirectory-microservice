@@ -1,5 +1,7 @@
 package de.debuglevel.activedirectory.user
 
+import java.util.*
+
 data class UserResponse(
     val username: String? = null,
     val givenname: String? = null,
@@ -9,6 +11,7 @@ data class UserResponse(
     val displayName: String? = null,
     val disabled: Boolean? = null,
     val lastLogon: String? = null,
+    val guid: UUID? = null,
     val whenCreated: String? = null,
     val error: String? = null
 ) {
@@ -21,6 +24,7 @@ data class UserResponse(
         user.displayName,
         user.disabled,
         user.lastLogonFormatted,
+        user.guid,
         user.whenCreatedFormatted
     )
 

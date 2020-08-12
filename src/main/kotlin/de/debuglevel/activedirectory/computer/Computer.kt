@@ -10,6 +10,7 @@ data class Computer(
     val logonCount: Int? = null,
     val operatingSystem: String? = null,
     val operatingSystemVersion: String? = null,
+    val guid: UUID? = null,
     val lastLogon: GregorianCalendar? = null,
     val whenCreated: GregorianCalendar? = null
 ) : ActiveDirectoryEntity {

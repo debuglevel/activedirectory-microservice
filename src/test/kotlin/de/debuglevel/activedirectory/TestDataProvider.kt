@@ -67,7 +67,8 @@ object TestDataProvider {
                 "maxmustermann",
                 "Max",
                 "max@mustermann.de",
-                "Max Mustermann"
+                "Max Mustermann",
+                guid = null
             )
         ),
         UserTestData(
@@ -75,7 +76,8 @@ object TestDataProvider {
                 "maxmustermann",
                 "Max",
                 "max@mustermann.de",
-                "Max Mustermann"
+                "Max Mustermann",
+                guid = null
             )
         ),
         UserTestData(
@@ -83,7 +85,8 @@ object TestDataProvider {
                 "alexaloah",
                 "Alex",
                 "alex@aloah.de",
-                "Alex Aloah"
+                "Alex Aloah",
+                guid = null
             )
         ),
         UserTestData(
@@ -91,7 +94,8 @@ object TestDataProvider {
                 "alexaloah",
                 "Alex",
                 "alex@aloah.de",
-                "Alex Aloah"
+                "Alex Aloah",
+                guid = null
             )
         )
     )
@@ -112,7 +116,8 @@ object TestDataProvider {
                 "maxmustermann",
                 "Max",
                 "max@mustermann.de",
-                "Max Mustermann"
+                "Max Mustermann",
+                guid = null
             )
         ),
         UserTestData(
@@ -120,7 +125,8 @@ object TestDataProvider {
                 "maxmustermann",
                 "Max",
                 "max@mustermann.de",
-                "Max Mustermann"
+                "Max Mustermann",
+                guid = null
             )
         )
     )

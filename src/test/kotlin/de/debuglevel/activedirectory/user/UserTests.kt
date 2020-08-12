@@ -12,8 +12,8 @@ class UserTests {
         // Arrange
 
         // Act
-        val user1 = User("test", userAccountControl = 2)
-        val user2 = User("test", userAccountControl = 514)
+        val user1 = User("test", userAccountControl = 2, guid = null)
+        val user2 = User("test", userAccountControl = 514, guid = null)
 
         // Assert
         assertThat(user1.disabled).isEqualTo(true)
@@ -25,8 +25,8 @@ class UserTests {
         // Arrange
 
         // Act
-        val user1 = User("test", userAccountControl = 0)
-        val user2 = User("test", userAccountControl = 512)
+        val user1 = User("test", userAccountControl = 0, guid = null)
+        val user2 = User("test", userAccountControl = 512, guid = null)
 
         // Assert
         assertThat(user1.disabled).isEqualTo(false)
