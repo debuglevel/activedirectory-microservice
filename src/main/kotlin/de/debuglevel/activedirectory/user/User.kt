@@ -13,7 +13,8 @@ data class User(
     val displayName: String? = null,
     val userAccountControl: Int? = null,
     val lastLogon: GregorianCalendar? = null,
-    val whenCreated: GregorianCalendar? = null
+    val whenCreated: GregorianCalendar? = null,
+    val guid: UUID?
 ) : ActiveDirectoryEntity {
     /**
      * Account is disabled if bitwise 2 is set

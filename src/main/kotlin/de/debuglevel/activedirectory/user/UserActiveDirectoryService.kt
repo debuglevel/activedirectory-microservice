@@ -2,8 +2,10 @@ package de.debuglevel.activedirectory.user
 
 import de.debuglevel.activedirectory.ActiveDirectorySearchScope
 import de.debuglevel.activedirectory.ActiveDirectoryService
+import de.debuglevel.activedirectory.ActiveDirectoryUtils
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.convertLdapTimestampToDate
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.getAttributeValue
+import de.debuglevel.activedirectory.ActiveDirectoryUtils.getBinaryAttributeValue
 import de.debuglevel.activedirectory.EntityActiveDirectoryService
 import mu.KotlinLogging
 import javax.inject.Singleton
@@ -30,7 +32,8 @@ class UserActiveDirectoryService(
             "displayName",
             "userAccountControl",
             "lastLogon",
-            "whenCreated"
+            "whenCreated",
+            "objectGUID"
         )
 
     override fun getAll(): List<User> {
@@ -72,6 +75,7 @@ class UserActiveDirectoryService(
         val surname = it.getAttributeValue("sn")
         val displayName = it.getAttributeValue("displayName")
         val userAccountControl = it.getAttributeValue("userAccountControl")?.toIntOrNull()
+        val guid = ActiveDirectoryUtils.toUUID(it.getBinaryAttributeValue("objectGUID"))
         val lastLogon = {
             val lastLogonTimestamp = it.getAttributeValue("lastLogon")?.toLong()
             if (lastLogonTimestamp != null && lastLogonTimestamp != 0L) {
@@ -98,7 +102,8 @@ class UserActiveDirectoryService(
             displayName,
             userAccountControl,
             lastLogon,
-            whenCreated
+            whenCreated,
+            guid
         )
     }
 
