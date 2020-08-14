@@ -59,6 +59,7 @@ object ActiveDirectoryUtils {
         properties[Context.PROVIDER_URL] = "LDAP://$domainController"
         properties[Context.SECURITY_PRINCIPAL] = username
         properties[Context.SECURITY_CREDENTIALS] = password
+        properties["java.naming.ldap.attributes.binary"] = "objectGUID"
 
         // initializing Active Directory LDAP connection
         return try {
@@ -79,26 +80,31 @@ object ActiveDirectoryUtils {
         return value
     }
 
-    fun toUUID(attributeValue: String?): UUID? {
-        logger.debug { "Converting '$attributeValue' to UUID..." }
+    fun SearchResult.getBinaryAttributeValue(attributeName: String): ByteArray? {
+        logger.debug { "Getting attribute '$attributeName' value..." }
+        val attribute = attributes.get(attributeName)
+        val byteArray = attribute.get() as ByteArray?
+        logger.debug { "Got attribute '$attributeName' binary value: ${bytesToHexString(byteArray)}" }
+        return byteArray
+    }
 
-        if (attributeValue.isNullOrBlank()) {
+    fun toUUID(guidByteArray: ByteArray?): UUID? {
+        logger.debug { "Converting ByteArray to UUID..." }
+
+        if (guidByteArray == null) {
             return null
         }
 
-        val string = attributeValue
-        logger.trace { "String: $string" }
-        val bytes = string.toByteArray(Charsets.US_ASCII)
-        logger.debug { "Bytes: ${bytesToHexString(bytes)} (${bytes.size})" } // BUG: sometimes it's not 16 bytes
-        val uuid = UUIDUtils.bytesToUUID(bytes)
+        logger.trace { "Bytes: ${bytesToHexString(guidByteArray)} (${guidByteArray.size})" }
+        val uuid = UUIDUtils.bytesToUUID(guidByteArray)
         logger.trace { "UUID: $uuid" }
 
-        logger.debug { "Converted $attributeValue to UUID: $uuid" }
+        logger.debug { "Converted ByteArray to UUID: $uuid" }
         return uuid
     }
 
-    private fun bytesToHexString(bytes: ByteArray): String {
-        return bytes.joinToString(" ") { String.format("%02X", it) }
+    private fun bytesToHexString(bytes: ByteArray?): String {
+        return bytes?.joinToString(" ") { String.format("%02X", it) } ?: "<empty ByteArray>"
     }
 
     class ConnectionException(e: Exception) : Exception("Could not connect to LDAP server", e)
