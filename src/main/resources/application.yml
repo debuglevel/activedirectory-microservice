@@ -1,19 +1,19 @@
 app:
   activedirectory:
-    username: cn=admin
-    password: password
-    server: localhost:10389
+    username: x
+    password: x
+    server: x
     #searchbase: dc=myDomain,dc=myTld
-    searchbase: dc=root
+    searchbase: x
   security:
-    username: SECRET_USERNAME
-    password: SECRET_PASSWORD
+    username: user
+    password: password123
 
 micronaut:
   application:
     name: activedirectory
   server:
-    port: 8080 # default: -1 (random port)
+    port: 8081 # default: -1 (random port)
     cors:
     #  enabled: true # default: false
   router:
@@ -25,7 +25,7 @@ micronaut:
         mapping: /swagger/**
   security:
     # default: false
-    enabled: true
+    enabled: false
 
 jackson:
   serialization:
