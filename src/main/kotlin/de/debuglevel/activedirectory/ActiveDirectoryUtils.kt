@@ -5,6 +5,7 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 import javax.naming.Context
+import javax.naming.directory.Attribute
 import javax.naming.directory.SearchResult
 import javax.naming.ldap.InitialLdapContext
 import javax.naming.ldap.LdapContext
@@ -82,8 +83,8 @@ object ActiveDirectoryUtils {
 
     fun SearchResult.getBinaryAttributeValue(attributeName: String): ByteArray? {
         logger.debug { "Getting attribute '$attributeName' value..." }
-        val attribute = attributes.get(attributeName)
-        val byteArray = attribute.get() as ByteArray?
+        val attribute: Attribute? = attributes.get(attributeName)
+        val byteArray = attribute?.get() as ByteArray?
         logger.debug { "Got attribute '$attributeName' binary value: ${bytesToHexString(byteArray)}" }
         return byteArray
     }
