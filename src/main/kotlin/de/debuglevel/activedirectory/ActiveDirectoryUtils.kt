@@ -108,5 +108,39 @@ object ActiveDirectoryUtils {
         return bytes?.joinToString(" ") { String.format("%02X", it) } ?: "<empty ByteArray>"
     }
 
+    /**
+     * Gets the lastLogon or LastLogonTimestamp value, depending on what is newer.
+     * (because on is replicated and the other is not; and even the replication might be delayed by multiple days because of reasons...)
+     * See: https://serverfault.com/questions/734615/lastlogon-vs-lastlogontimestamp-in-active-directory
+     */
+    fun getLastLogon(it: SearchResult): GregorianCalendar? {
+        val lastLogon = getDate(it, "lastLogon")
+        val lastLogonTimestamp = getDate(it, "lastLogonTimestamp")
+
+        return if (lastLogon != null && lastLogonTimestamp != null) {
+            if (lastLogon.after(lastLogonTimestamp)) {
+                lastLogon
+            } else lastLogonTimestamp
+        } else if (lastLogon != null) {
+            lastLogon
+        } else if (lastLogonTimestamp != null) {
+            lastLogonTimestamp
+        } else {
+            null
+        }
+    }
+
+    fun getDate(
+        it: SearchResult,
+        attributeName: String
+    ): GregorianCalendar? {
+        val timestamp = it.getAttributeValue(attributeName)?.toLong()
+        return if (timestamp != null && timestamp != 0L) {
+            convertLdapTimestampToDate(timestamp)
+        } else {
+            null
+        }
+    }
+
     class ConnectionException(e: Exception) : Exception("Could not connect to LDAP server", e)
 }

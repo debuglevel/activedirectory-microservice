@@ -6,6 +6,7 @@ import de.debuglevel.activedirectory.ActiveDirectoryUtils
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.convertLdapTimestampToDate
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.getAttributeValue
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.getBinaryAttributeValue
+import de.debuglevel.activedirectory.ActiveDirectoryUtils.getLastLogon
 import de.debuglevel.activedirectory.EntityActiveDirectoryService
 import mu.KotlinLogging
 import javax.inject.Singleton
@@ -76,22 +77,8 @@ class UserActiveDirectoryService(
         val displayName = it.getAttributeValue("displayName")
         val userAccountControl = it.getAttributeValue("userAccountControl")?.toIntOrNull()
         val guid = ActiveDirectoryUtils.toUUID(it.getBinaryAttributeValue("objectGUID"))
-        val lastLogon = {
-            val lastLogonTimestamp = it.getAttributeValue("lastLogon")?.toLong()
-            if (lastLogonTimestamp != null && lastLogonTimestamp != 0L) {
-                convertLdapTimestampToDate(lastLogonTimestamp)
-            } else {
-                null
-            }
-        }()
-        val whenCreated = {
-            val whenCreatedTimestamp = it.getAttributeValue("whenCreated")
-            if (whenCreatedTimestamp != null) {
-                convertLdapTimestampToDate(whenCreatedTimestamp)
-            } else {
-                null
-            }
-        }()
+        val lastLogon = getLastLogon(it)
+        val whenCreated = ActiveDirectoryUtils.getDate(it, "whenCreated")
 
         return User(
             samaaccountname,
