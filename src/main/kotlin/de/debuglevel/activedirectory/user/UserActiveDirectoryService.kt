@@ -33,6 +33,7 @@ class UserActiveDirectoryService(
             "displayName",
             "userAccountControl",
             "lastLogon",
+            "lastLogonTimestamp",
             "whenCreated",
             "objectGUID"
         )
@@ -78,7 +79,14 @@ class UserActiveDirectoryService(
         val userAccountControl = it.getAttributeValue("userAccountControl")?.toIntOrNull()
         val guid = ActiveDirectoryUtils.toUUID(it.getBinaryAttributeValue("objectGUID"))
         val lastLogon = getLastLogon(it)
-        val whenCreated = ActiveDirectoryUtils.getDate(it, "whenCreated")
+        val whenCreated = {
+            val whenCreatedTimestamp = it.getAttributeValue("whenCreated")
+            if (whenCreatedTimestamp != null) {
+                convertLdapTimestampToDate(whenCreatedTimestamp)
+            } else {
+                null
+            }
+        }()
 
         return User(
             samaaccountname,

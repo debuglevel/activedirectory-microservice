@@ -5,12 +5,10 @@ import de.debuglevel.activedirectory.ActiveDirectoryService
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.convertLdapTimestampToDate
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.getAttributeValue
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.getBinaryAttributeValue
-import de.debuglevel.activedirectory.ActiveDirectoryUtils.getDate
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.getLastLogon
 import de.debuglevel.activedirectory.ActiveDirectoryUtils.toUUID
 import de.debuglevel.activedirectory.EntityActiveDirectoryService
 import mu.KotlinLogging
-import java.util.*
 import javax.inject.Singleton
 import javax.naming.directory.SearchResult
 
@@ -30,6 +28,7 @@ class ComputerActiveDirectoryService(
             "cn",
             "userAccountControl",
             "lastLogon",
+            "lastLogonTimestamp",
             "whenCreated",
             "logonCount",
             "operatingSystem",
@@ -76,7 +75,14 @@ class ComputerActiveDirectoryService(
         val logonCount = it.getAttributeValue("logonCount")?.toInt()
         val userAccountControl = it.getAttributeValue("userAccountControl")?.toIntOrNull()
         val lastLogon = getLastLogon(it)
-        val whenCreated = getDate(it, "whenCreated")
+        val whenCreated = {
+            val whenCreatedTimestamp = it.getAttributeValue("whenCreated")
+            if (whenCreatedTimestamp != null) {
+                convertLdapTimestampToDate(whenCreatedTimestamp)
+            } else {
+                null
+            }
+        }()
 
         return Computer(
             commonName,
