@@ -13,7 +13,7 @@ micronaut:
   application:
     name: activedirectory
   server:
-    port: 8081 # default: -1 (random port)
+    port: 8080 # default: -1 (random port)
     cors:
     #  enabled: true # default: false
   router:
