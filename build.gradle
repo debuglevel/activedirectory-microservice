@@ -147,7 +147,7 @@ dependencies {
     implementation "io.swagger.core.v3:swagger-annotations"
 
     // LDAP In-Memory server
-    testCompile  group: 'com.github.trevershick', name: 'ldap-test-utils', version: '2.0.1'
+    testImplementation "com.github.trevershick:ldap-test-utils:2.0.1"
      
     // Micronaut Views
     //implementation "io.micronaut.views:micronaut-views-thymeleaf"

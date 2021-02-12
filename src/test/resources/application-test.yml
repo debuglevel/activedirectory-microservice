@@ -1,3 +1,14 @@
+app:
+  activedirectory:
+    username: cn=admin
+    password: password
+    server: localhost:10389
+    searchbase: dc=root
+  security:
+    configurable-credential-authentication:
+      username: "SECRET_USERNAME"
+      password: "SECRET_PASSWORD"
+
 micronaut:
   server:
     port: -1 # for unit testing, assign random ports
