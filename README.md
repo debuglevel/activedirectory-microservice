@@ -4,7 +4,7 @@
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/debuglevel/activedirectory-microservice?sort=semver)
 ![GitHub](https://img.shields.io/github/license/debuglevel/activedirectory-microservice)
 
-# Greeter Microservice
+# ActiveDirectory Microservice
 This is a simple REST microservice for some basic queries on a Microsoft Active Directory.
 
 # HTTP API
